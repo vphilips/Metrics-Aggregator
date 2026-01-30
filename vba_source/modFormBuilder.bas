@@ -127,17 +127,22 @@ End Sub
 ' ==================================================================================
 Private Sub BuildHistCashflowsForm()
     Dim uf As Object
-    Set uf = CreateUserForm("ufHistCashflows", "Historical Cashflows", 330, 320)
+    Set uf = CreateUserForm("ufHistCashflows", "Historical Cashflows", 330, 380)
     
     Dim topPos As Double: topPos = 10
     
     ' Fields
     AddLabelAndText uf, topPos, "Account", "Account", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Client", "Client", True: topPos = topPos + 24
+    ' Investor now Mandatory
+    AddLabelAndText uf, topPos, "Investor", "Investor", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "FromDates", "From Dates", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "ToDates", "To Dates", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Currency", "Currency", True: topPos = topPos + 24
-    AddLabelAndText uf, topPos, "Investor", "Investor", False: topPos = topPos + 24
+    ' New Fields
+    AddLabelAndText uf, topPos, "ViewingCoy", "Viewing Coy", True: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "Metric", "Metric", True: topPos = topPos + 24
+    
     AddLabelAndText uf, topPos, "AIVFundGroupD", "AIV Fund Grp D", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "InvestorTransactionDate", "Inv. Txn Date", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "InvestorTransactionQuarter", "Inv. Txn Quarter", False: topPos = topPos + 24
@@ -146,13 +151,16 @@ Private Sub BuildHistCashflowsForm()
     AddButtons uf, topPos, "sp_GetHistoricalCashflows", _
         """@Account"", Me.txtAccount.Value, " & vbCrLf & _
         """@Client"", Me.txtClient.Value, " & vbCrLf & _
+        """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
         """@FromDate"", Me.txtFromDates.Value, " & vbCrLf & _
         """@ToDate"", Me.txtToDates.Value, " & vbCrLf & _
         """@Currency"", Me.txtCurrency.Value, " & vbCrLf & _
-        """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
+        """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf & _
+        """@Metric"", Me.txtMetric.Value, " & vbCrLf & _
         """@AIVFundGroupD"", Me.txtAIVFundGroupD.Value, " & vbCrLf & _
         """@InvestorTransactionDate"", Me.txtInvestorTransactionDate.Value, " & vbCrLf & _
-        """@InvestorTransactionQuarter"", Me.txtInvestorTransactionQuarter.Value"
+        """@InvestorTransactionQuarter"", Me.txtInvestorTransactionQuarter.Value", _
+        Array("Account", "Client", "Investor", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
 
 End Sub
 
@@ -161,16 +169,21 @@ End Sub
 ' ==================================================================================
 Private Sub BuildMyPerformanceForm()
     Dim uf As Object
-    Set uf = CreateUserForm("ufMyPerformance", "My Performance", 330, 320)
+    Set uf = CreateUserForm("ufMyPerformance", "My Performance", 330, 380)
     
     Dim topPos As Double: topPos = 10
     
     AddLabelAndText uf, topPos, "Account", "Account", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Client", "Client", True: topPos = topPos + 24
+    ' Date now Mandatory
+    AddLabelAndText uf, topPos, "Date", "Date", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "FromDates", "From Dates", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "ToDates", "To Dates", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Currency", "Currency", True: topPos = topPos + 24
-    AddLabelAndText uf, topPos, "Date", "Date", False: topPos = topPos + 24
+    ' New Fields
+    AddLabelAndText uf, topPos, "ViewingCoy", "Viewing Coy", True: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "Metric", "Metric", True: topPos = topPos + 24
+    
     AddLabelAndText uf, topPos, "AIVFundGroupD", "AIV Fund Grp D", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Investor", "Investor", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "InvTxnQuarter", "Inv. Txn Quarter", False: topPos = topPos + 24
@@ -178,13 +191,16 @@ Private Sub BuildMyPerformanceForm()
     AddButtons uf, topPos, "sp_GetMyPerformance", _
         """@Account"", Me.txtAccount.Value, " & vbCrLf & _
         """@Client"", Me.txtClient.Value, " & vbCrLf & _
+        """@Date"", Me.txtDate.Value, " & vbCrLf & _
         """@FromDate"", Me.txtFromDates.Value, " & vbCrLf & _
         """@ToDate"", Me.txtToDates.Value, " & vbCrLf & _
         """@Currency"", Me.txtCurrency.Value, " & vbCrLf & _
-        """@Date"", Me.txtDate.Value, " & vbCrLf & _
+        """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf & _
+        """@Metric"", Me.txtMetric.Value, " & vbCrLf & _
         """@AIVFundGroupD"", Me.txtAIVFundGroupD.Value, " & vbCrLf & _
         """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
-        """@InvestorTransactionQuarter"", Me.txtInvTxnQuarter.Value"
+        """@InvestorTransactionQuarter"", Me.txtInvTxnQuarter.Value", _
+        Array("Account", "Client", "Date", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
     
 End Sub
 
@@ -193,30 +209,39 @@ End Sub
 ' ==================================================================================
 Private Sub BuildPortfolioDiversificationForm()
     Dim uf As Object
-    ' Wider for 2 columns
-    Set uf = CreateUserForm("ufPortfolioDiversification", "Portfolio Diversification", 650, 380)
+    ' Wider for 2 columns - Increased Height for new fields
+    Set uf = CreateUserForm("ufPortfolioDiversification", "Portfolio Diversification", 650, 420)
     
     ' Column 1
     Dim topPos1 As Double: topPos1 = 10
     AddLabelAndText uf, topPos1, "Account", "Account", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Client", "Client", True: topPos1 = topPos1 + 24
+    ' Date now Mandatory
+    AddLabelAndText uf, topPos1, "Date", "Date", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "FromDates", "From Dates", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "ToDates", "To Dates", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Currency", "Currency", True: topPos1 = topPos1 + 24
-    AddLabelAndText uf, topPos1, "Date", "Date", False: topPos1 = topPos1 + 24
+    ' New Fields
+    AddLabelAndText uf, topPos1, "ViewingCoy", "Viewing Coy", True: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Metric", "Metric", True: topPos1 = topPos1 + 24
+    
     AddLabelAndText uf, topPos1, "AIVFundGroupD", "AIV Fund Grp D", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Investor", "Investor", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "EntryFund", "Entry Fund", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Manager", "Manager", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Portfolio", "Portfolio", False: topPos1 = topPos1 + 24
-    AddLabelAndText uf, topPos1, "PortCloseYear", "Close Year", False: topPos1 = topPos1 + 24
+    
     
     ' Column 2
     Dim topPos2 As Double: topPos2 = 10
+    AddLabelAndText uf, topPos2, "PortCloseYear", "Close Year", False, 1: topPos2 = topPos2 + 24
     AddLabelAndText uf, topPos2, "PortCommitYear", "Commit. Year", False, 1: topPos2 = topPos2 + 24
     AddLabelAndText uf, topPos2, "PortGeo", "Geography", False, 1: topPos2 = topPos2 + 24
     AddLabelAndText uf, topPos2, "PortGeoBroad", "Geo Broad", False, 1: topPos2 = topPos2 + 24
     AddLabelAndText uf, topPos2, "PortGeoL3", "Geo L3", False, 1: topPos2 = topPos2 + 24
+    ' New Field
+    AddLabelAndText uf, topPos2, "PortGeoL5", "Geo L5", False, 1: topPos2 = topPos2 + 24
+    
     AddLabelAndText uf, topPos2, "PortInd", "Industry", False, 1: topPos2 = topPos2 + 24
     AddLabelAndText uf, topPos2, "PortIndL1", "Industry L1", False, 1: topPos2 = topPos2 + 24
     AddLabelAndText uf, topPos2, "PortStage", "Stage", False, 1: topPos2 = topPos2 + 24
@@ -231,10 +256,12 @@ Private Sub BuildPortfolioDiversificationForm()
     AddButtons uf, finalTop, "sp_GetPortfolioDiversification", _
         """@Account"", Me.txtAccount.Value, " & vbCrLf & _
         """@Client"", Me.txtClient.Value, " & vbCrLf & _
+        """@Date"", Me.txtDate.Value, " & vbCrLf & _
         """@FromDates"", Me.txtFromDates.Value, " & vbCrLf & _
         """@ToDates"", Me.txtToDates.Value, " & vbCrLf & _
         """@Currency"", Me.txtCurrency.Value, " & vbCrLf & _
-        """@Date"", Me.txtDate.Value, " & vbCrLf & _
+        """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf & _
+        """@Metric"", Me.txtMetric.Value, " & vbCrLf & _
         """@AIVFundGroupD"", Me.txtAIVFundGroupD.Value, " & vbCrLf & _
         """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
         """@EntryFund"", Me.txtEntryFund.Value, " & vbCrLf & _
@@ -245,13 +272,15 @@ Private Sub BuildPortfolioDiversificationForm()
         """@PortfolioGeography"", Me.txtPortGeo.Value, " & vbCrLf & _
         """@PortfolioGeographyBroad"", Me.txtPortGeoBroad.Value, " & vbCrLf & _
         """@PortfolioGeographyL3"", Me.txtPortGeoL3.Value, " & vbCrLf & _
+        """@PortfolioGeographyL5"", Me.txtPortGeoL5.Value, " & vbCrLf & _
         """@PortfolioIndustry"", Me.txtPortInd.Value, " & vbCrLf & _
         """@PortfolioIndustryL1"", Me.txtPortIndL1.Value, " & vbCrLf & _
         """@PortfolioStage"", Me.txtPortStage.Value, " & vbCrLf & _
         """@PortfolioStageBroad"", Me.txtPortStageBroad.Value, " & vbCrLf & _
         """@PortfolioStatus"", Me.txtPortStatus.Value, " & vbCrLf & _
         """@PortfolioTypeBroadID"", Me.txtPortTypeBroad.Value, " & vbCrLf & _
-        """@PortfolioVintageYear"", Me.txtPortVintage.Value"
+        """@PortfolioVintageYear"", Me.txtPortVintage.Value", _
+        Array("Account", "Client", "Date", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
     
 End Sub
 
@@ -260,16 +289,21 @@ End Sub
 ' ==================================================================================
 Private Sub BuildCompanyDiversificationForm()
     Dim uf As Object
-    Set uf = CreateUserForm("ufCompanyDiversification", "Company Diversification", 650, 300)
+    Set uf = CreateUserForm("ufCompanyDiversification", "Company Diversification", 650, 400)
     
     ' Column 1
     Dim topPos1 As Double: topPos1 = 10
     AddLabelAndText uf, topPos1, "Account", "Account", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Client", "Client", True: topPos1 = topPos1 + 24
+    ' Date now Mandatory
+    AddLabelAndText uf, topPos1, "Date", "Date", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "FromDates", "From Dates", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "ToDates", "To Dates", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Currency", "Currency", True: topPos1 = topPos1 + 24
-    AddLabelAndText uf, topPos1, "Date", "Date", False: topPos1 = topPos1 + 24
+    ' New Fields
+    AddLabelAndText uf, topPos1, "ViewingCoy", "Viewing Coy", True: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Metric", "Metric", True: topPos1 = topPos1 + 24
+    
     AddLabelAndText uf, topPos1, "AIVFundGroupD", "AIV Fund Grp D", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Investor", "Investor", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "CoExpGeoBroad", "Co Exp Geo Broad", False: topPos1 = topPos1 + 24
@@ -292,10 +326,12 @@ Private Sub BuildCompanyDiversificationForm()
     AddButtons uf, finalTop, "sp_GetCompanyDiversification", _
         """@Account"", Me.txtAccount.Value, " & vbCrLf & _
         """@Client"", Me.txtClient.Value, " & vbCrLf & _
+        """@Date"", Me.txtDate.Value, " & vbCrLf & _
         """@FromDates"", Me.txtFromDates.Value, " & vbCrLf & _
         """@ToDates"", Me.txtToDates.Value, " & vbCrLf & _
         """@Currency"", Me.txtCurrency.Value, " & vbCrLf & _
-        """@Date"", Me.txtDate.Value, " & vbCrLf & _
+        """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf & _
+        """@Metric"", Me.txtMetric.Value, " & vbCrLf & _
         """@AIVFundGroupD"", Me.txtAIVFundGroupD.Value, " & vbCrLf & _
         """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
         """@CompExpGeoBroad"", Me.txtCoExpGeoBroad.Value, " & vbCrLf & _
@@ -307,11 +343,12 @@ Private Sub BuildCompanyDiversificationForm()
         """@CompExpInvYear"", Me.txtCoExpInvYear.Value, " & vbCrLf & _
         """@CompExpIsPublic"", Me.txtCoExpPublic.Value, " & vbCrLf & _
         """@CompExpStage"", Me.txtCoExpStage.Value, " & vbCrLf & _
-        """@CompExpStageBroad"", Me.txtCoExpStageBroad.Value"
+        """@CompExpStageBroad"", Me.txtCoExpStageBroad.Value", _
+        Array("Account", "Client", "Date", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
 
 End Sub
 
-Private Sub AddButtons(formComp As Object, topPos As Double, spName As String, paramCode As String)
+Private Sub AddButtons(formComp As Object, topPos As Double, spName As String, paramCode As String, mandatoryFields As Variant)
     ' Add Submit and Cancel buttons and associated code
     
     Dim btnSubmit As Object, btnCancel As Object
@@ -351,17 +388,16 @@ Private Sub AddButtons(formComp As Object, topPos As Double, spName As String, p
     code = code & "Private Sub btnSubmit_Click()" & vbCrLf
     ' Validation Code Block
     code = code & "    ' 1. Validate Mandatory Fields" & vbCrLf
-    code = code & "    If Not ValidateMandatory(Me.txtAccount, ""Account"") Then Exit Sub" & vbCrLf
-    code = code & "    If Not ValidateMandatory(Me.txtClient, ""Client"") Then Exit Sub" & vbCrLf
-    code = code & "    If Not ValidateMandatory(Me.txtFromDates, ""From Dates"") Then Exit Sub" & vbCrLf
-    code = code & "    If Not ValidateDate(Me.txtFromDates, ""From Dates"") Then Exit Sub" & vbCrLf
-    code = code & "    If Not ValidateMandatory(Me.txtToDates, ""To Dates"") Then Exit Sub" & vbCrLf
-    code = code & "    If Not ValidateDate(Me.txtToDates, ""To Dates"") Then Exit Sub" & vbCrLf
-    code = code & "    If Not ValidateMandatory(Me.txtCurrency, ""Currency"") Then Exit Sub" & vbCrLf
-    code = code & "    On Error Resume Next" & vbCrLf
-    code = code & "    If Not Me.txtDate Is Nothing Then" & vbCrLf
-    code = code & "         If Not ValidateDate(Me.txtDate, ""Date"") Then Exit Sub" & vbCrLf
-    code = code & "    End If" & vbCrLf
+    
+    ' Dynamic Mandatory Validation
+    Dim f As Variant
+    For Each f In mandatoryFields
+        code = code & "    If Not ValidateMandatory(Me.txt" & f & ", """ & f & """) Then Exit Sub" & vbCrLf
+        If InStr(1, f, "Date", vbTextCompare) > 0 Then
+            code = code & "    If Not ValidateDate(Me.txt" & f & ", """ & f & """) Then Exit Sub" & vbCrLf
+        End If
+    Next f
+    
     code = code & "    On Error GoTo 0" & vbCrLf & vbCrLf
     
     ' Params Building
