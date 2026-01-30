@@ -147,25 +147,19 @@ Private Sub BuildHistCashflowsForm()
     
     ' Buttons
     ' UPDATED: Direct call to edw.pr_usp_investor_transactions2
-    ' Mappings:
-    ' Client -> @SourceTableVolVal
-    ' Metric -> @MetricName
-    ' FromDates -> @StartDate
-    ' ToDates -> @EndDate
-    ' Currency -> @ViewCurrencyCode
-    ' Investor -> @InvestorGroupID
-    ' ViewingCoy -> @InvestorRegion
-    ' AIVFundGroupID -> @AIVFundGroupID
     
-    AddButtons uf, topPos, "edw.pr_usp_investor_transactions2", _
-        """@SourceTableVolVal"", Me.txtClient.Value, " & vbCrLf & _
-        """@MetricName"", Me.txtMetric.Value, " & vbCrLf & _
-        """@StartDate"", Me.txtFromDates.Value, " & vbCrLf & _
-        """@EndDate"", Me.txtToDates.Value, " & vbCrLf & _
-        """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf & _
-        """@InvestorRegion"", Me.txtViewingCoy.Value, " & vbCrLf & _
-        """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf & _
-        """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value", _
+    Dim paramCode As String
+    paramCode = ""
+    paramCode = paramCode & """@SourceTableVolVal"", Me.txtClient.Value, " & vbCrLf
+    paramCode = paramCode & """@MetricName"", Me.txtMetric.Value, " & vbCrLf
+    paramCode = paramCode & """@StartDate"", Me.txtFromDates.Value, " & vbCrLf
+    paramCode = paramCode & """@EndDate"", Me.txtToDates.Value, " & vbCrLf
+    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf
+    paramCode = paramCode & """@InvestorRegion"", Me.txtViewingCoy.Value, " & vbCrLf
+    paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf
+    paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value"
+
+    AddButtons uf, topPos, "edw.pr_usp_investor_transactions2", paramCode, _
         Array("Account", "Client", "Investor", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
 
 End Sub
@@ -194,15 +188,19 @@ Private Sub BuildMyPerformanceForm()
     
     ' Buttons
     ' UPDATED: Direct call to edw.pr_usp_investor_transactions2
-    AddButtons uf, topPos, "edw.pr_usp_investor_transactions2", _
-        """@SourceTableVolVal"", Me.txtClient.Value, " & vbCrLf & _
-        """@MetricName"", Me.txtMetric.Value, " & vbCrLf & _
-        """@StartDate"", Me.txtFromDates.Value, " & vbCrLf & _
-        """@EndDate"", Me.txtToDates.Value, " & vbCrLf & _
-        """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf & _
-        """@InvestorRegion"", Me.txtViewingCoy.Value, " & vbCrLf & _
-        """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf & _
-        """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value", _
+    
+    Dim paramCode As String
+    paramCode = ""
+    paramCode = paramCode & """@SourceTableVolVal"", Me.txtClient.Value, " & vbCrLf
+    paramCode = paramCode & """@MetricName"", Me.txtMetric.Value, " & vbCrLf
+    paramCode = paramCode & """@StartDate"", Me.txtFromDates.Value, " & vbCrLf
+    paramCode = paramCode & """@EndDate"", Me.txtToDates.Value, " & vbCrLf
+    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf
+    paramCode = paramCode & """@InvestorRegion"", Me.txtViewingCoy.Value, " & vbCrLf
+    paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf
+    paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value"
+    
+    AddButtons uf, topPos, "edw.pr_usp_investor_transactions2", paramCode, _
         Array("Account", "Client", "Investor", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
     
 End Sub
@@ -254,50 +252,38 @@ Private Sub BuildPortfolioDiversificationForm()
     Dim finalTop As Double
     finalTop = IIf(topPos1 > topPos2, topPos1, topPos2)
     
-    AddButtons uf, finalTop, "sp_GetPortfolioDiversification", _
-        """@Account"", Me.txtAccount.Value, " & vbCrLf & _
-        """@Client"", Me.txtClient.Value, " & vbCrLf & _
-        """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
-        """@FromDate"", Me.txtFromDates.Value, " & vbCrLf & _
-        """@ToDate"", Me.txtToDates.Value, " & vbCrLf & _
-        """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf & _
-        """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf & _
-        """@Metric"", Me.txtMetric.Value, " & vbCrLf & _
-        """@Date"", Me.txtDate.Value, " & vbCrLf & _
-        """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value, " & vbCrLf & _
-        """@EntryFund"", Me.txtEntryFund.Value, " & vbCrLf & _
-        """@Manager"", Me.txtManager.Value, " & vbCrLf & _
-        """@Portfolio"", Me.txtPortfolio.Value, " & vbCrLf & _
-        """@PortfolioCloseYear"", Me.txtPortCloseYear.Value, " & vbCrLf & _
-        """@PortfolioCommitmentYear"", Me.txtPortCommitYear.Value, " & vbCrLf & _
-        """@PortfolioGeography"", Me.txtPortGeo.Value, " & vbCrLf & _
-        """@PortfolioGeographyBroad"", Me.txtPortGeoBroad.Value, " & vbCrLf & _
-        """@PortfolioGeographyL3"", Me.txtPortGeoL3.Value, " & vbCrLf & _
-        """@PortfolioGeographyL5"", Me.txtPortGeoL5.Value, " & vbCrLf & _
-        """@PortfolioIndustry"", Me.txtPortInd.Value, " & vbCrLf & _
-        """@PortfolioIndustryL1"", Me.txtPortIndL1.Value, " & vbCrLf & _
-        """@PortfolioStage"", Me.txtPortStage.Value, " & vbCrLf & _
-        """@PortfolioStageBroad"", Me.txtPortStageBroad.Value, " & vbCrLf & _
-        """@PortfolioStatus"", Me.txtPortStatus.Value, " & vbCrLf & _
-        """@PortfolioTypeBroadID"", Me.txtPortTypeBroad.Value, " & vbCrLf & _
-        """@PortfolioVintageYear"", Me.txtPortVintage.Value", _
+    Dim paramCode As String
+    paramCode = ""
+    paramCode = paramCode & """@Account"", Me.txtAccount.Value, " & vbCrLf
+    paramCode = paramCode & """@Client"", Me.txtClient.Value, " & vbCrLf
+    paramCode = paramCode & """@Investor"", Me.txtInvestor.Value, " & vbCrLf
+    paramCode = paramCode & """@FromDate"", Me.txtFromDates.Value, " & vbCrLf
+    paramCode = paramCode & """@ToDate"", Me.txtToDates.Value, " & vbCrLf
+    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf
+    paramCode = paramCode & """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf
+    paramCode = paramCode & """@Metric"", Me.txtMetric.Value, " & vbCrLf
+    paramCode = paramCode & """@Date"", Me.txtDate.Value, " & vbCrLf
+    paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value, " & vbCrLf
+    paramCode = paramCode & """@EntryFund"", Me.txtEntryFund.Value, " & vbCrLf
+    paramCode = paramCode & """@Manager"", Me.txtManager.Value, " & vbCrLf
+    paramCode = paramCode & """@Portfolio"", Me.txtPortfolio.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioCloseYear"", Me.txtPortCloseYear.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioCommitmentYear"", Me.txtPortCommitYear.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioGeography"", Me.txtPortGeo.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioGeographyBroad"", Me.txtPortGeoBroad.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioGeographyL3"", Me.txtPortGeoL3.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioGeographyL5"", Me.txtPortGeoL5.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioIndustry"", Me.txtPortInd.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioIndustryL1"", Me.txtPortIndL1.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioStage"", Me.txtPortStage.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioStageBroad"", Me.txtPortStageBroad.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioStatus"", Me.txtPortStatus.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioTypeBroadID"", Me.txtPortTypeBroad.Value, " & vbCrLf
+    paramCode = paramCode & """@PortfolioVintageYear"", Me.txtPortVintage.Value"
+
+    AddButtons uf, finalTop, "sp_GetPortfolioDiversification", paramCode, _
         Array("Account", "Client", "Investor", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
-        """@Manager"", Me.txtManager.Value, " & vbCrLf & _
-        """@Portfolio"", Me.txtPortfolio.Value, " & vbCrLf & _
-        """@PortfolioCloseYear"", Me.txtPortCloseYear.Value, " & vbCrLf & _
-        """@PortfolioCommitmentYear"", Me.txtPortCommitYear.Value, " & vbCrLf & _
-        """@PortfolioGeography"", Me.txtPortGeo.Value, " & vbCrLf & _
-        """@PortfolioGeographyBroad"", Me.txtPortGeoBroad.Value, " & vbCrLf & _
-        """@PortfolioGeographyL3"", Me.txtPortGeoL3.Value, " & vbCrLf & _
-        """@PortfolioGeographyL5"", Me.txtPortGeoL5.Value, " & vbCrLf & _
-        """@PortfolioIndustry"", Me.txtPortInd.Value, " & vbCrLf & _
-        """@PortfolioIndustryL1"", Me.txtPortIndL1.Value, " & vbCrLf & _
-        """@PortfolioStage"", Me.txtPortStage.Value, " & vbCrLf & _
-        """@PortfolioStageBroad"", Me.txtPortStageBroad.Value, " & vbCrLf & _
-        """@PortfolioStatus"", Me.txtPortStatus.Value, " & vbCrLf & _
-        """@PortfolioTypeBroadID"", Me.txtPortTypeBroad.Value, " & vbCrLf & _
-        """@PortfolioVintageYear"", Me.txtPortVintage.Value", _
-        Array("Account", "Client", "Date", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
+
     
 End Sub
 
@@ -333,43 +319,7 @@ Private Sub BuildCompanyDiversificationForm()
     AddLabelAndText uf, topPos2, "CoExpInvYear", "Co Exp Inv Year", False, 1: topPos2 = topPos2 + 24
     AddLabelAndText uf, topPos2, "CoExpPublic", "Co Exp Public", False, 1: topPos2 = topPos2 + 24
     AddLabelAndText uf, topPos2, "CoExpStage", "Co Exp Stage", False, 1: topPos2 = topPos2 + 24
-    AddLabelAndText uf, topPos2, "CoExpStageBroad", "Co Exp Stg Broad", False, 1: topPos2 = topPos2 + 24
-    
-    Dim finalTop As Double
-    finalTop = IIf(topPos1 > topPos2, topPos1, topPos2)
-    
-    AddButtons uf, finalTop, "sp_GetCompanyDiversification", _
-        """@Account"", Me.txtAccount.Value, " & vbCrLf & _
-        """@Client"", Me.txtClient.Value, " & vbCrLf & _
-        """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
-        """@FromDate"", Me.txtFromDates.Value, " & vbCrLf & _
-        """@ToDates"", Me.txtToDates.Value, " & vbCrLf & _
-        """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf & _
-        """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf & _
-        """@Metric"", Me.txtMetric.Value, " & vbCrLf & _
-        """@Date"", Me.txtDate.Value, " & vbCrLf & _
-        """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value, " & vbCrLf & _
-        """@CompExpGeoBroad"", Me.txtCoExpGeoBroad.Value, " & vbCrLf & _
-        """@CompExpGeoCountry"", Me.txtCoExpGeoCount.Value, " & vbCrLf & _
-        """@CompExpIndId"", Me.txtCoExpIndID.Value, " & vbCrLf & _
-        """@CompExpIndBroad"", Me.txtCoExpIndBroad.Value, " & vbCrLf & _
-        """@CompExpIndCategory"", Me.txtCoExpIndCat.Value, " & vbCrLf & _
-        """@CompExpInvType"", Me.txtCoExpInvType.Value, " & vbCrLf & _
-        """@CompExpInvYear"", Me.txtCoExpInvYear.Value, " & vbCrLf & _
-        """@CompExpIsPublic"", Me.txtCoExpPublic.Value, " & vbCrLf & _
-        """@CompExpStage"", Me.txtCoExpStage.Value, " & vbCrLf & _
-        """@CompExpStageBroad"", Me.txtCoExpStageBroad.Value", _
-        Array("Account", "Client", "Investor", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
-        """@CompExpGeoCountry"", Me.txtCoExpGeoCount.Value, " & vbCrLf & _
-        """@CompExpIndId"", Me.txtCoExpIndID.Value, " & vbCrLf & _
-        """@CompExpIndBroad"", Me.txtCoExpIndBroad.Value, " & vbCrLf & _
-        """@CompExpIndCategory"", Me.txtCoExpIndCat.Value, " & vbCrLf & _
-        """@CompExpInvType"", Me.txtCoExpInvType.Value, " & vbCrLf & _
-        """@CompExpInvYear"", Me.txtCoExpInvYear.Value, " & vbCrLf & _
-        """@CompExpIsPublic"", Me.txtCoExpPublic.Value, " & vbCrLf & _
-        """@CompExpStage"", Me.txtCoExpStage.Value, " & vbCrLf & _
-        """@CompExpStageBroad"", Me.txtCoExpStageBroad.Value", _
-        Array("Account", "Client", "Date", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
+
 
 End Sub
 
