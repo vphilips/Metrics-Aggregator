@@ -134,32 +134,38 @@ Private Sub BuildHistCashflowsForm()
     ' Fields
     AddLabelAndText uf, topPos, "Account", "Account", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Client", "Client", True: topPos = topPos + 24
-    ' Investor now Mandatory
     AddLabelAndText uf, topPos, "Investor", "Investor", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "FromDates", "From Dates", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "ToDates", "To Dates", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Currency", "Currency", True: topPos = topPos + 24
-    ' New Fields
     AddLabelAndText uf, topPos, "ViewingCoy", "Viewing Coy", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Metric", "Metric", True: topPos = topPos + 24
     
-    AddLabelAndText uf, topPos, "AIVFundGroupD", "AIV Fund Grp D", False: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "AIVFundGroupID", "AIV Fund Grp ID", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "InvestorTransactionDate", "Inv. Txn Date", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "InvestorTransactionQuarter", "Inv. Txn Quarter", False: topPos = topPos + 24
     
     ' Buttons
-    AddButtons uf, topPos, "sp_GetHistoricalCashflows", _
-        """@Account"", Me.txtAccount.Value, " & vbCrLf & _
-        """@Client"", Me.txtClient.Value, " & vbCrLf & _
-        """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
-        """@FromDate"", Me.txtFromDates.Value, " & vbCrLf & _
-        """@ToDate"", Me.txtToDates.Value, " & vbCrLf & _
-        """@Currency"", Me.txtCurrency.Value, " & vbCrLf & _
-        """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf & _
-        """@Metric"", Me.txtMetric.Value, " & vbCrLf & _
-        """@AIVFundGroupD"", Me.txtAIVFundGroupD.Value, " & vbCrLf & _
-        """@InvestorTransactionDate"", Me.txtInvestorTransactionDate.Value, " & vbCrLf & _
-        """@InvestorTransactionQuarter"", Me.txtInvestorTransactionQuarter.Value", _
+    ' UPDATED: Direct call to edw.pr_usp_investor_transactions2
+    ' Mappings:
+    ' Client -> @SourceTableVolVal
+    ' Metric -> @MetricName
+    ' FromDates -> @StartDate
+    ' ToDates -> @EndDate
+    ' Currency -> @ViewCurrencyCode
+    ' Investor -> @InvestorGroupID
+    ' ViewingCoy -> @InvestorRegion
+    ' AIVFundGroupID -> @AIVFundGroupID
+    
+    AddButtons uf, topPos, "edw.pr_usp_investor_transactions2", _
+        """@SourceTableVolVal"", Me.txtClient.Value, " & vbCrLf & _
+        """@MetricName"", Me.txtMetric.Value, " & vbCrLf & _
+        """@StartDate"", Me.txtFromDates.Value, " & vbCrLf & _
+        """@EndDate"", Me.txtToDates.Value, " & vbCrLf & _
+        """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf & _
+        """@InvestorRegion"", Me.txtViewingCoy.Value, " & vbCrLf & _
+        """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf & _
+        """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value", _
         Array("Account", "Client", "Investor", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
 
 End Sub
@@ -175,32 +181,29 @@ Private Sub BuildMyPerformanceForm()
     
     AddLabelAndText uf, topPos, "Account", "Account", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Client", "Client", True: topPos = topPos + 24
-    ' Date now Mandatory
-    AddLabelAndText uf, topPos, "Date", "Date", True: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "Investor", "Investor", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "FromDates", "From Dates", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "ToDates", "To Dates", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Currency", "Currency", True: topPos = topPos + 24
-    ' New Fields
     AddLabelAndText uf, topPos, "ViewingCoy", "Viewing Coy", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Metric", "Metric", True: topPos = topPos + 24
     
-    AddLabelAndText uf, topPos, "AIVFundGroupD", "AIV Fund Grp D", False: topPos = topPos + 24
-    AddLabelAndText uf, topPos, "Investor", "Investor", False: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "Date", "Date", False: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "AIVFundGroupID", "AIV Fund Grp ID", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "InvTxnQuarter", "Inv. Txn Quarter", False: topPos = topPos + 24
     
-    AddButtons uf, topPos, "sp_GetMyPerformance", _
-        """@Account"", Me.txtAccount.Value, " & vbCrLf & _
-        """@Client"", Me.txtClient.Value, " & vbCrLf & _
-        """@Date"", Me.txtDate.Value, " & vbCrLf & _
-        """@FromDate"", Me.txtFromDates.Value, " & vbCrLf & _
-        """@ToDate"", Me.txtToDates.Value, " & vbCrLf & _
-        """@Currency"", Me.txtCurrency.Value, " & vbCrLf & _
-        """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf & _
-        """@Metric"", Me.txtMetric.Value, " & vbCrLf & _
-        """@AIVFundGroupD"", Me.txtAIVFundGroupD.Value, " & vbCrLf & _
-        """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
-        """@InvestorTransactionQuarter"", Me.txtInvTxnQuarter.Value", _
-        Array("Account", "Client", "Date", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
+    ' Buttons
+    ' UPDATED: Direct call to edw.pr_usp_investor_transactions2
+    AddButtons uf, topPos, "edw.pr_usp_investor_transactions2", _
+        """@SourceTableVolVal"", Me.txtClient.Value, " & vbCrLf & _
+        """@MetricName"", Me.txtMetric.Value, " & vbCrLf & _
+        """@StartDate"", Me.txtFromDates.Value, " & vbCrLf & _
+        """@EndDate"", Me.txtToDates.Value, " & vbCrLf & _
+        """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf & _
+        """@InvestorRegion"", Me.txtViewingCoy.Value, " & vbCrLf & _
+        """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf & _
+        """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value", _
+        Array("Account", "Client", "Investor", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
     
 End Sub
 
@@ -216,17 +219,15 @@ Private Sub BuildPortfolioDiversificationForm()
     Dim topPos1 As Double: topPos1 = 10
     AddLabelAndText uf, topPos1, "Account", "Account", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Client", "Client", True: topPos1 = topPos1 + 24
-    ' Date now Mandatory
-    AddLabelAndText uf, topPos1, "Date", "Date", True: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Investor", "Investor", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "FromDates", "From Dates", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "ToDates", "To Dates", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Currency", "Currency", True: topPos1 = topPos1 + 24
-    ' New Fields
     AddLabelAndText uf, topPos1, "ViewingCoy", "Viewing Coy", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Metric", "Metric", True: topPos1 = topPos1 + 24
     
-    AddLabelAndText uf, topPos1, "AIVFundGroupD", "AIV Fund Grp D", False: topPos1 = topPos1 + 24
-    AddLabelAndText uf, topPos1, "Investor", "Investor", False: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Date", "Date", False: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "AIVFundGroupID", "AIV Fund Grp ID", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "EntryFund", "Entry Fund", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Manager", "Manager", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Portfolio", "Portfolio", False: topPos1 = topPos1 + 24
@@ -256,15 +257,31 @@ Private Sub BuildPortfolioDiversificationForm()
     AddButtons uf, finalTop, "sp_GetPortfolioDiversification", _
         """@Account"", Me.txtAccount.Value, " & vbCrLf & _
         """@Client"", Me.txtClient.Value, " & vbCrLf & _
-        """@Date"", Me.txtDate.Value, " & vbCrLf & _
-        """@FromDates"", Me.txtFromDates.Value, " & vbCrLf & _
-        """@ToDates"", Me.txtToDates.Value, " & vbCrLf & _
-        """@Currency"", Me.txtCurrency.Value, " & vbCrLf & _
+        """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
+        """@FromDate"", Me.txtFromDates.Value, " & vbCrLf & _
+        """@ToDate"", Me.txtToDates.Value, " & vbCrLf & _
+        """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf & _
         """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf & _
         """@Metric"", Me.txtMetric.Value, " & vbCrLf & _
-        """@AIVFundGroupD"", Me.txtAIVFundGroupD.Value, " & vbCrLf & _
-        """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
+        """@Date"", Me.txtDate.Value, " & vbCrLf & _
+        """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value, " & vbCrLf & _
         """@EntryFund"", Me.txtEntryFund.Value, " & vbCrLf & _
+        """@Manager"", Me.txtManager.Value, " & vbCrLf & _
+        """@Portfolio"", Me.txtPortfolio.Value, " & vbCrLf & _
+        """@PortfolioCloseYear"", Me.txtPortCloseYear.Value, " & vbCrLf & _
+        """@PortfolioCommitmentYear"", Me.txtPortCommitYear.Value, " & vbCrLf & _
+        """@PortfolioGeography"", Me.txtPortGeo.Value, " & vbCrLf & _
+        """@PortfolioGeographyBroad"", Me.txtPortGeoBroad.Value, " & vbCrLf & _
+        """@PortfolioGeographyL3"", Me.txtPortGeoL3.Value, " & vbCrLf & _
+        """@PortfolioGeographyL5"", Me.txtPortGeoL5.Value, " & vbCrLf & _
+        """@PortfolioIndustry"", Me.txtPortInd.Value, " & vbCrLf & _
+        """@PortfolioIndustryL1"", Me.txtPortIndL1.Value, " & vbCrLf & _
+        """@PortfolioStage"", Me.txtPortStage.Value, " & vbCrLf & _
+        """@PortfolioStageBroad"", Me.txtPortStageBroad.Value, " & vbCrLf & _
+        """@PortfolioStatus"", Me.txtPortStatus.Value, " & vbCrLf & _
+        """@PortfolioTypeBroadID"", Me.txtPortTypeBroad.Value, " & vbCrLf & _
+        """@PortfolioVintageYear"", Me.txtPortVintage.Value", _
+        Array("Account", "Client", "Investor", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
         """@Manager"", Me.txtManager.Value, " & vbCrLf & _
         """@Portfolio"", Me.txtPortfolio.Value, " & vbCrLf & _
         """@PortfolioCloseYear"", Me.txtPortCloseYear.Value, " & vbCrLf & _
@@ -295,17 +312,15 @@ Private Sub BuildCompanyDiversificationForm()
     Dim topPos1 As Double: topPos1 = 10
     AddLabelAndText uf, topPos1, "Account", "Account", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Client", "Client", True: topPos1 = topPos1 + 24
-    ' Date now Mandatory
-    AddLabelAndText uf, topPos1, "Date", "Date", True: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Investor", "Investor", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "FromDates", "From Dates", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "ToDates", "To Dates", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Currency", "Currency", True: topPos1 = topPos1 + 24
-    ' New Fields
     AddLabelAndText uf, topPos1, "ViewingCoy", "Viewing Coy", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Metric", "Metric", True: topPos1 = topPos1 + 24
     
-    AddLabelAndText uf, topPos1, "AIVFundGroupD", "AIV Fund Grp D", False: topPos1 = topPos1 + 24
-    AddLabelAndText uf, topPos1, "Investor", "Investor", False: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Date", "Date", False: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "AIVFundGroupID", "AIV Fund Grp ID", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "CoExpGeoBroad", "Co Exp Geo Broad", False: topPos1 = topPos1 + 24
     
     ' Column 2
@@ -326,15 +341,25 @@ Private Sub BuildCompanyDiversificationForm()
     AddButtons uf, finalTop, "sp_GetCompanyDiversification", _
         """@Account"", Me.txtAccount.Value, " & vbCrLf & _
         """@Client"", Me.txtClient.Value, " & vbCrLf & _
-        """@Date"", Me.txtDate.Value, " & vbCrLf & _
-        """@FromDates"", Me.txtFromDates.Value, " & vbCrLf & _
+        """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
+        """@FromDate"", Me.txtFromDates.Value, " & vbCrLf & _
         """@ToDates"", Me.txtToDates.Value, " & vbCrLf & _
-        """@Currency"", Me.txtCurrency.Value, " & vbCrLf & _
+        """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf & _
         """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf & _
         """@Metric"", Me.txtMetric.Value, " & vbCrLf & _
-        """@AIVFundGroupD"", Me.txtAIVFundGroupD.Value, " & vbCrLf & _
-        """@Investor"", Me.txtInvestor.Value, " & vbCrLf & _
+        """@Date"", Me.txtDate.Value, " & vbCrLf & _
+        """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value, " & vbCrLf & _
         """@CompExpGeoBroad"", Me.txtCoExpGeoBroad.Value, " & vbCrLf & _
+        """@CompExpGeoCountry"", Me.txtCoExpGeoCount.Value, " & vbCrLf & _
+        """@CompExpIndId"", Me.txtCoExpIndID.Value, " & vbCrLf & _
+        """@CompExpIndBroad"", Me.txtCoExpIndBroad.Value, " & vbCrLf & _
+        """@CompExpIndCategory"", Me.txtCoExpIndCat.Value, " & vbCrLf & _
+        """@CompExpInvType"", Me.txtCoExpInvType.Value, " & vbCrLf & _
+        """@CompExpInvYear"", Me.txtCoExpInvYear.Value, " & vbCrLf & _
+        """@CompExpIsPublic"", Me.txtCoExpPublic.Value, " & vbCrLf & _
+        """@CompExpStage"", Me.txtCoExpStage.Value, " & vbCrLf & _
+        """@CompExpStageBroad"", Me.txtCoExpStageBroad.Value", _
+        Array("Account", "Client", "Investor", "FromDates", "ToDates", "Currency", "ViewingCoy", "Metric")
         """@CompExpGeoCountry"", Me.txtCoExpGeoCount.Value, " & vbCrLf & _
         """@CompExpIndId"", Me.txtCoExpIndID.Value, " & vbCrLf & _
         """@CompExpIndBroad"", Me.txtCoExpIndBroad.Value, " & vbCrLf & _
