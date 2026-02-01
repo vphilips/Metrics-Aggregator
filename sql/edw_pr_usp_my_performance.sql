@@ -1,12 +1,11 @@
-CREATE OR ALTER PROCEDURE edw.pr_usp_investor_transactions2
+CREATE OR ALTER PROCEDURE edw.pr_usp_my_performance
     (
         @MetricName         varchar(100) = 'Pro-Rata Distribution',
         @SourceTableVolVal  varchar(100),
-        @StartDate          date         = '2012-01-01',
-        @EndDate            date         = '2026-01-19',
+        -- @StartDate and @EndDate removed
         @ViewCurrencyCode   varchar(20)  = 'USD',     
-        @FilterSourceCurrency varchar(20)= NULL,      -- Filter by specific source currency
-        @FundTypesExclude   varchar(400) = NULL,      -- comma-separated list
+        @InvestorRegion     varchar(100) = NULL,
+        @FundTypesExclude   varchar(400) = NULL,      
         @InvestorGroupID    int          = NULL,
         @AIVFundGroupID     int          = NULL,
         @MaxRows            int          = 0,
@@ -16,9 +15,8 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @StartKey int = CONVERT(int, CONVERT(char(8), @StartDate, 112));
-    DECLARE @EndKey   int = CONVERT(int, CONVERT(char(8), @EndDate, 112));
-
+    -- Removed @StartKey and @EndKey logic based on @StartDate/@EndDate
+    
     DECLARE @EffectiveMaxRows int = CASE WHEN @MaxRows IS NULL OR @MaxRows <= 0 THEN 2147483647 ELSE @MaxRows END;
 
     -- Validate Order By
@@ -28,11 +26,6 @@ BEGIN
     -- 1. Get View Currency ID
     DECLARE @ViewCurrencyID int;
     SELECT @ViewCurrencyID = Currency_Id FROM edw.currency WHERE symbol = @ViewCurrencyCode;
-    
-    -- 2. Get Filter Source Currency ID
-    DECLARE @FilterSourceCurrencyID int = NULL;
-    IF @FilterSourceCurrency IS NOT NULL AND @FilterSourceCurrency <> ''
-        SELECT @FilterSourceCurrencyID = Currency_Id FROM edw.currency WHERE symbol = @FilterSourceCurrency;
 
     DECLARE @sql nvarchar(max) = N'
 ;WITH investor_lookup AS
@@ -78,8 +71,8 @@ SELECT TOP (@EffectiveMaxRows)
 
     jc.name                              AS join_currency_name,
 
-    -- FX CONVERSION APPLIED HERE: Source -> Fund -> View
-    SUM(f.amount * ISNULL(xr1.Rate, 1) * ISNULL(xr2.Rate, 1))   AS aggregated_amount
+    -- FX CONVERSION APPLIED HERE
+    SUM(f.amount * ISNULL(xr.Rate, 1))   AS aggregated_amount
 
 FROM edw.fact_investor_transactions f
 JOIN investor_lookup il
@@ -99,27 +92,21 @@ LEFT JOIN edw.currency jc
 LEFT JOIN edw.dim_investor grp
   ON (CASE WHEN inv.Part_Of_HV_Staff=1 THEN 1444282 ELSE inv.Parent_Investor_Id END) = grp.investor_name_id
   
--- FX JOIN 1: Source (f.currency_id) -> Fund (f.fund_currency_id)
-LEFT JOIN edw.exchange_rates xr1
-  ON xr1.From_Currency_ID = f.currency_id
-  AND xr1.To_Currency_ID = f.fund_currency_id
-  AND xr1.Date = cal.calendar_date
-
--- FX JOIN 2: Fund (f.fund_currency_id) -> View (@ViewCurrencyID)
-LEFT JOIN edw.exchange_rates xr2
-  ON xr2.From_Currency_ID = f.fund_currency_id
-  AND xr2.To_Currency_ID = @ViewCurrencyID
-  AND xr2.Date = cal.calendar_date
+-- FX JOIN
+LEFT JOIN edw.exchange_rates xr
+  ON xr.From_Currency_ID = f.currency_id
+  AND xr.To_Currency_ID = @ViewCurrencyID
+  AND xr.Date = cal.calendar_date
 
 WHERE
     f.exclude_transaction = 0
     AND f.date_id <> -1
-    AND f.date_id BETWEEN @StartKey AND @EndKey
+    -- removed date_id BETWEEN AND clause
 ';
 
     -- Optional filters
-    IF @FilterSourceCurrencyID IS NOT NULL
-        SET @sql += N' AND f.currency_id = @FilterSourceCurrencyID ';
+    IF @InvestorRegion IS NOT NULL
+        SET @sql += N' AND inv.Address_Region = @InvestorRegion ';
 
     IF @InvestorGroupID IS NOT NULL
         SET @sql += N' AND (CASE WHEN inv.Part_Of_HV_Staff=1 THEN 1444282 ELSE inv.Parent_Investor_Id END) = @InvestorGroupID ';
@@ -151,7 +138,7 @@ ORDER BY ';
         WHEN 'date'     THEN N' cal.calendar_date '
         WHEN 'fund'     THEN N' fund.Short_Name '
         WHEN 'investor' THEN N' inv.Short_Name '
-        WHEN 'amount'   THEN N' SUM(f.amount * ISNULL(xr1.Rate, 1) * ISNULL(xr2.Rate, 1)) ' 
+        WHEN 'amount'   THEN N' SUM(f.amount * ISNULL(xr.Rate, 1)) '
         ELSE                 N' cal.calendar_date '
     END + N' DESC;';
 
@@ -159,8 +146,7 @@ ORDER BY ';
         @sql,
         N'@MetricName varchar(100),
           @SourceTableVolVal varchar(100),
-          @StartKey int, @EndKey int,
-          @FilterSourceCurrencyID int,
+          @InvestorRegion varchar(100),
           @InvestorGroupID int,
           @AIVFundGroupID int,
           @FundTypesExclude varchar(400),
@@ -169,8 +155,7 @@ ORDER BY ';
           @EffectiveMaxRows int',
         @MetricName=@MetricName,
         @SourceTableVolVal=@SourceTableVolVal,
-        @StartKey=@StartKey, @EndKey=@EndKey,
-        @FilterSourceCurrencyID=@FilterSourceCurrencyID,
+        @InvestorRegion=@InvestorRegion,
         @InvestorGroupID=@InvestorGroupID,
         @AIVFundGroupID=@AIVFundGroupID,
         @FundTypesExclude=@FundTypesExclude,
