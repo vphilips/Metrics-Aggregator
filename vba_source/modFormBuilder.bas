@@ -143,7 +143,6 @@ Private Sub BuildHistCashflowsForm()
     
     AddLabelAndText uf, topPos, "AIVFundGroupID", "AIV Fund Grp ID", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "InvestorTransactionDate", "Inv. Txn Date", False: topPos = topPos + 24
-    AddLabelAndText uf, topPos, "InvestorTransactionDate", "Inv. Txn Date", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "InvestorTransactionQuarter", "Inv. Txn Quarter", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Currency", "Currency", False: topPos = topPos + 24
     
