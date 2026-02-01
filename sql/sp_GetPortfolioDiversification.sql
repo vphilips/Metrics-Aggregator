@@ -3,9 +3,9 @@ CREATE OR ALTER PROCEDURE sp_GetPortfolioDiversification
         @Account varchar(100) = NULL,
         @Client varchar(100) = NULL,
         @Investor varchar(100) = NULL,
-        -- Dates removed
+        -- Dates Removed
         @ViewCurrencyCode varchar(20) = 'USD',
-        @ViewingCoy varchar(100) = NULL,
+        @FilterSourceCurrency varchar(20) = NULL,
         @Metric varchar(100) = NULL,
         @Date date = NULL,
         @AIVFundGroupID int = NULL,
@@ -30,12 +30,12 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    -- Skeleton logic for now
     SELECT 
         'PortfolioDiversification' as report_type,
         @Account as account,
         @Client as client,
-        @Metric as metric
-    -- Add actual query here
+        @Metric as metric,
+        @FilterSourceCurrency as source_currency_filter,
+        @ViewCurrencyCode as view_currency
 END
 GO

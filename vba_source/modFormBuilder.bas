@@ -178,11 +178,11 @@ Private Sub BuildMyPerformanceForm()
     AddLabelAndText uf, topPos, "Client", "Client", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Investor", "Investor", True: topPos = topPos + 24
     ' Dates Removed
-    AddLabelAndText uf, topPos, "Currency", "Currency", True: topPos = topPos + 24
-    AddLabelAndText uf, topPos, "ViewingCoy", "Viewing Coy", True: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "ViewingCoy", "Viewing Currency", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Metric", "Metric", True: topPos = topPos + 24
     
-    AddLabelAndText uf, topPos, "Date", "Date", False: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "Date", "Date", True: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "Currency", "Currency", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "AIVFundGroupID", "AIV Fund Grp ID", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "InvTxnQuarter", "Inv. Txn Quarter", False: topPos = topPos + 24
     
@@ -194,13 +194,13 @@ Private Sub BuildMyPerformanceForm()
     paramCode = paramCode & """@SourceTableVolVal"", Me.txtClient.Value, " & vbCrLf
     paramCode = paramCode & """@MetricName"", Me.txtMetric.Value, " & vbCrLf
     ' Dates Removed
-    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf
-    paramCode = paramCode & """@InvestorRegion"", Me.txtViewingCoy.Value, " & vbCrLf
+    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
+    paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
     paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf
     paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value"
     
     AddButtons uf, topPos, "edw.pr_usp_my_performance", paramCode, _
-        Array("Account", "Client", "Investor", "Currency", "ViewingCoy", "Metric")
+        Array("Account", "Client", "Investor", "ViewingCoy", "Metric", "Date")
     
 End Sub
 
@@ -218,11 +218,11 @@ Private Sub BuildPortfolioDiversificationForm()
     AddLabelAndText uf, topPos1, "Client", "Client", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Investor", "Investor", True: topPos1 = topPos1 + 24
     ' Dates Removed
-    AddLabelAndText uf, topPos1, "Currency", "Currency", True: topPos1 = topPos1 + 24
-    AddLabelAndText uf, topPos1, "ViewingCoy", "Viewing Coy", True: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "ViewingCoy", "Viewing Currency", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Metric", "Metric", True: topPos1 = topPos1 + 24
     
-    AddLabelAndText uf, topPos1, "Date", "Date", False: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Date", "Date", True: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Currency", "Currency", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "AIVFundGroupID", "AIV Fund Grp ID", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "EntryFund", "Entry Fund", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Manager", "Manager", False: topPos1 = topPos1 + 24
@@ -256,8 +256,8 @@ Private Sub BuildPortfolioDiversificationForm()
     paramCode = paramCode & """@Client"", Me.txtClient.Value, " & vbCrLf
     paramCode = paramCode & """@Investor"", Me.txtInvestor.Value, " & vbCrLf
     ' Dates Removed
-    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf
-    paramCode = paramCode & """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf
+    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
+    paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
     paramCode = paramCode & """@Metric"", Me.txtMetric.Value, " & vbCrLf
     paramCode = paramCode & """@Date"", Me.txtDate.Value, " & vbCrLf
     paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value, " & vbCrLf
@@ -279,7 +279,7 @@ Private Sub BuildPortfolioDiversificationForm()
     paramCode = paramCode & """@PortfolioVintageYear"", Me.txtPortVintage.Value"
 
     AddButtons uf, finalTop, "sp_GetPortfolioDiversification", paramCode, _
-        Array("Account", "Client", "Investor", "Currency", "ViewingCoy", "Metric")
+        Array("Account", "Client", "Investor", "ViewingCoy", "Metric", "Date")
 
     
 End Sub
@@ -297,11 +297,11 @@ Private Sub BuildCompanyDiversificationForm()
     AddLabelAndText uf, topPos1, "Client", "Client", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Investor", "Investor", True: topPos1 = topPos1 + 24
     ' Dates Removed
-    AddLabelAndText uf, topPos1, "Currency", "Currency", True: topPos1 = topPos1 + 24
-    AddLabelAndText uf, topPos1, "ViewingCoy", "Viewing Coy", True: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "ViewingCoy", "Viewing Currency", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Metric", "Metric", True: topPos1 = topPos1 + 24
     
-    AddLabelAndText uf, topPos1, "Date", "Date", False: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Date", "Date", True: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Currency", "Currency", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "AIVFundGroupID", "AIV Fund Grp ID", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "CoExpGeoBroad", "Co Exp Geo Broad", False: topPos1 = topPos1 + 24
     
@@ -326,8 +326,8 @@ Private Sub BuildCompanyDiversificationForm()
     paramCode = paramCode & """@Client"", Me.txtClient.Value, " & vbCrLf
     paramCode = paramCode & """@Investor"", Me.txtInvestor.Value, " & vbCrLf
     ' Dates Removed
-    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtCurrency.Value, " & vbCrLf
-    paramCode = paramCode & """@ViewingCoy"", Me.txtViewingCoy.Value, " & vbCrLf
+    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
+    paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
     paramCode = paramCode & """@Metric"", Me.txtMetric.Value, " & vbCrLf
     paramCode = paramCode & """@Date"", Me.txtDate.Value, " & vbCrLf
     paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value, " & vbCrLf
@@ -343,7 +343,7 @@ Private Sub BuildCompanyDiversificationForm()
     paramCode = paramCode & """@CompExpStageBroad"", Me.txtCoExpStageBroad.Value"
 
     AddButtons uf, finalTop, "sp_GetCompanyDiversification", paramCode, _
-        Array("Account", "Client", "Investor", "Currency", "ViewingCoy", "Metric")
+        Array("Account", "Client", "Investor", "ViewingCoy", "Metric", "Date")
 
 End Sub
 
