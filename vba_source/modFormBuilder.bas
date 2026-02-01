@@ -196,10 +196,11 @@ Private Sub BuildMyPerformanceForm()
     ' Dates Removed
     paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
     paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
+    paramCode = paramCode & """@Date"", Me.txtDate.Value, " & vbCrLf
     paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf
     paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value"
     
-    AddButtons uf, topPos, "edw.pr_usp_my_performance", paramCode, _
+    AddButtons uf, topPos, "edw.pr_usp_investor_transactions3", paramCode, _
         Array("Account", "Client", "Investor", "ViewingCoy", "Metric", "Date")
     
 End Sub
@@ -322,13 +323,12 @@ Private Sub BuildCompanyDiversificationForm()
     
     Dim paramCode As String
     paramCode = ""
-    paramCode = paramCode & """@Account"", Me.txtAccount.Value, " & vbCrLf
-    paramCode = paramCode & """@Client"", Me.txtClient.Value, " & vbCrLf
-    paramCode = paramCode & """@Investor"", Me.txtInvestor.Value, " & vbCrLf
+    paramCode = paramCode & """@SourceTableVolVal"", Me.txtClient.Value, " & vbCrLf
+    paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf
     ' Dates Removed
     paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
     paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
-    paramCode = paramCode & """@Metric"", Me.txtMetric.Value, " & vbCrLf
+    paramCode = paramCode & """@MetricName"", Me.txtMetric.Value, " & vbCrLf
     paramCode = paramCode & """@Date"", Me.txtDate.Value, " & vbCrLf
     paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value, " & vbCrLf
     paramCode = paramCode & """@CompExpGeoBroad"", Me.txtCoExpGeoBroad.Value, " & vbCrLf
@@ -342,7 +342,7 @@ Private Sub BuildCompanyDiversificationForm()
     paramCode = paramCode & """@CompExpStage"", Me.txtCoExpStage.Value, " & vbCrLf
     paramCode = paramCode & """@CompExpStageBroad"", Me.txtCoExpStageBroad.Value"
 
-    AddButtons uf, finalTop, "sp_GetCompanyDiversification", paramCode, _
+    AddButtons uf, finalTop, "edw.pr_usp_investor_transactions_cd", paramCode, _
         Array("Account", "Client", "Investor", "ViewingCoy", "Metric", "Date")
 
 End Sub
