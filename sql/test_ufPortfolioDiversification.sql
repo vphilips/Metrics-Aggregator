@@ -4,7 +4,7 @@
 -- Basic Params
 DECLARE @SourceTableVolVal       varchar(100) = '12345';      -- REPLACE with valid Investor ID
 DECLARE @Metric                  varchar(100) = 'Net Asset Value';
-DECLARE @ViewCurrencyCode        varchar(20)  = 'USD';
+DECLARE @ViewCurrencyID          int          = 1;
 DECLARE @FilterSourceCurrency    varchar(20)  = NULL;
 DECLARE @Date                    date         = '2025-12-31';
 DECLARE @AIVFundGroupID          int          = NULL;
@@ -31,7 +31,7 @@ PRINT 'Executing sp_GetPortfolioDiversification with dummy parameters...';
 
 EXEC sp_GetPortfolioDiversification
     @SourceTableVolVal       = @SourceTableVolVal,
-    @ViewCurrencyCode        = @ViewCurrencyCode,
+    @ViewCurrencyID          = @ViewCurrencyID,
     @FilterSourceCurrency    = @FilterSourceCurrency,
     @Metric                  = @Metric,
     @Date                    = @Date,

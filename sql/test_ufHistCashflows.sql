@@ -5,7 +5,7 @@ DECLARE @SourceTableVolVal    varchar(100) = '12345';      -- REPLACE with valid
 DECLARE @MetricName           varchar(100) = 'Pro-Rata Distribution';
 DECLARE @StartDate            date         = '2010-01-01';
 DECLARE @EndDate              date         = '2025-12-31';
-DECLARE @ViewCurrencyCode     varchar(20)  = 'USD';
+DECLARE @ViewCurrencyID       int          = 1;            -- 1 = USD (Check exchange_rates table)
 DECLARE @FilterSourceCurrency varchar(20)  = NULL;         -- Optional: 'EUR', 'GBP', etc.
 DECLARE @AIVFundGroupID       int          = NULL;         -- Optional: Filter by Fund Group
 
@@ -21,7 +21,7 @@ EXEC edw.pr_usp_investor_transactions2
     @SourceTableVolVal    = @SourceTableVolVal,
     @StartDate            = @StartDate,
     @EndDate              = @EndDate,
-    @ViewCurrencyCode     = @ViewCurrencyCode,
+    @ViewCurrencyID       = @ViewCurrencyID,
     @FilterSourceCurrency = @FilterSourceCurrency,
     @FundTypesExclude     = @FundTypesExclude,
     @InvestorGroupID      = @InvestorGroupID,

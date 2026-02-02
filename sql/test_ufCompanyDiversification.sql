@@ -5,7 +5,7 @@
 DECLARE @SourceTableVolVal    varchar(100) = '12345';      -- REPLACE with valid Investor ID
 DECLARE @MetricName           varchar(100) = 'Net Asset Value';
 DECLARE @Date                 date         = '2025-12-31';
-DECLARE @ViewCurrencyCode     varchar(20)  = 'USD';
+DECLARE @ViewCurrencyID       int          = 1;
 DECLARE @FilterSourceCurrency varchar(20)  = NULL;
 DECLARE @AIVFundGroupID       int          = NULL;
 DECLARE @FundTypesExclude     varchar(400) = NULL;
@@ -31,7 +31,7 @@ EXEC edw.pr_usp_investor_transactions_cd
     @MetricName           = @MetricName,
     @SourceTableVolVal    = @SourceTableVolVal,
     @Date                 = @Date,
-    @ViewCurrencyCode     = @ViewCurrencyCode,
+    @ViewCurrencyID       = @ViewCurrencyID,
     @FilterSourceCurrency = @FilterSourceCurrency,
     @FundTypesExclude     = @FundTypesExclude,
     @InvestorGroupID      = @InvestorGroupID,

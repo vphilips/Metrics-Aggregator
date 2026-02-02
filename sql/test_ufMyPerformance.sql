@@ -4,7 +4,7 @@
 DECLARE @SourceTableVolVal    varchar(100) = '12345';      -- REPLACE with valid Investor ID
 DECLARE @MetricName           varchar(100) = 'Pro-Rata Distribution';
 DECLARE @Date                 date         = '2025-12-31'; -- As-Of Date
-DECLARE @ViewCurrencyCode     varchar(20)  = 'USD';
+DECLARE @ViewCurrencyID       int          = 1;            -- 1 = USD
 DECLARE @FilterSourceCurrency varchar(20)  = NULL;         -- Optional
 DECLARE @AIVFundGroupID       int          = NULL;         -- Optional
 
@@ -18,7 +18,7 @@ EXEC edw.pr_usp_investor_transactions3
     @MetricName           = @MetricName,
     @SourceTableVolVal    = @SourceTableVolVal,
     @Date                 = @Date,
-    @ViewCurrencyCode     = @ViewCurrencyCode,
+    @ViewCurrencyID       = @ViewCurrencyID,
     @FilterSourceCurrency = @FilterSourceCurrency,
     @InvestorGroupID      = @InvestorGroupID,
     @AIVFundGroupID       = @AIVFundGroupID,

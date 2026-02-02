@@ -3,7 +3,7 @@ CREATE OR ALTER PROCEDURE edw.pr_usp_investor_transactions_cd
         @MetricName         varchar(100) = 'Pro-Rata Distribution',
         @SourceTableVolVal  varchar(100),
         @Date               date,                     -- As-Of Date
-        @ViewCurrencyCode   varchar(20)  = 'USD',     
+        @ViewCurrencyID     int          = 1,     
         @FilterSourceCurrency varchar(20)= NULL,      -- Filter by specific source currency
         @FundTypesExclude   varchar(400) = NULL,      -- comma-separated list
         @InvestorGroupID    int          = NULL,
@@ -37,8 +37,8 @@ BEGIN
     IF @OrderBy NOT IN ('date','fund','investor','amount') SET @OrderBy = 'date';
 
     -- 1. Get View Currency ID
-    DECLARE @ViewCurrencyID int;
-    SELECT @ViewCurrencyID = Currency_Id FROM edw.currency WHERE symbol = @ViewCurrencyCode;
+    -- DECLARE @ViewCurrencyID int;
+    -- SELECT @ViewCurrencyID = Currency_Id FROM edw.currency WHERE symbol = @ViewCurrencyCode;
     
     -- 2. Get Filter Source Currency ID
     DECLARE @FilterSourceCurrencyID int = NULL;
@@ -64,8 +64,8 @@ SELECT TOP (@EffectiveMaxRows)
     @MetricName                          AS metric_name,
     NULL                                 AS investor_name_id, -- Not directly available in valuation table?
 
-    ''' + @ViewCurrencyCode + '''        AS metric_currency_name,
-    ''' + @ViewCurrencyCode + '''        AS metric_currency_code,
+    STR(@ViewCurrencyID)                 AS metric_currency_name,
+    STR(@ViewCurrencyID)                 AS metric_currency_code,
 
     cal.calendar_date                    AS transaction_date,
 
@@ -83,7 +83,7 @@ SELECT TOP (@EffectiveMaxRows)
     jc.name                              AS join_currency_name,
 
     -- FX CONVERSION APPLIED HERE: Source -> Fund -> View
-    SUM(f.amount * ISNULL(xr1.Rate, 1) * ISNULL(xr2.Rate, 1))   AS aggregated_amount
+    SUM(f.amount * ISNULL(xr1.fx_rate, 1) * ISNULL(xr2.fx_rate, 1))   AS aggregated_amount
 
 FROM edw.fact_company_valuation f
 JOIN edw.dim_fund fund
@@ -110,15 +110,15 @@ LEFT JOIN edw.industry ind
 
 -- FX JOIN 1
 LEFT JOIN edw.exchange_rates xr1
-  ON xr1.From_Currency_ID = f.currency_id
-  AND xr1.To_Currency_ID = f.fund_currency_id -- Assuming fund_currency_id exists in fact_company_valuation?
-  AND xr1.Date = cal.calendar_date
+  ON xr1.from_currency_id = f.currency_id
+  AND xr1.to_currency_id = f.fund_currency_id -- Assuming fund_currency_id exists in fact_company_valuation?
+  AND xr1.date_id = cal.date_id
 
 -- FX JOIN 2
 LEFT JOIN edw.exchange_rates xr2
-  ON xr2.From_Currency_ID = f.fund_currency_id -- verify column name
-  AND xr2.To_Currency_ID = @ViewCurrencyID
-  AND xr2.Date = cal.calendar_date
+  ON xr2.from_currency_id = f.fund_currency_id -- verify column name
+  AND xr2.to_currency_id = @ViewCurrencyID
+  AND xr2.date_id = cal.date_id
 
 WHERE
     f.date_id <> -1
@@ -166,7 +166,7 @@ ORDER BY ';
     SET @sql += CASE @OrderBy
         WHEN 'date'     THEN N' cal.calendar_date '
         WHEN 'fund'     THEN N' fund.Short_Name '
-        WHEN 'amount'   THEN N' SUM(f.amount * ISNULL(xr1.Rate, 1) * ISNULL(xr2.Rate, 1)) ' 
+        WHEN 'amount'   THEN N' SUM(f.amount * ISNULL(xr1.fx_rate, 1) * ISNULL(xr2.fx_rate, 1)) ' 
         ELSE                 N' cal.calendar_date '
     END + N' DESC;';
 
@@ -179,7 +179,6 @@ ORDER BY ';
           @InvestorGroupID int,
           @AIVFundGroupID int,
           @FundTypesExclude varchar(400),
-          @ViewCurrencyCode varchar(20),
           @ViewCurrencyID int,
           @EffectiveMaxRows int,
           @CompExpGeoBroad varchar(100),
@@ -199,7 +198,7 @@ ORDER BY ';
         @InvestorGroupID=@InvestorGroupID,
         @AIVFundGroupID=@AIVFundGroupID,
         @FundTypesExclude=@FundTypesExclude,
-        @ViewCurrencyCode=@ViewCurrencyCode,
+        @FundTypesExclude=@FundTypesExclude,
         @ViewCurrencyID=@ViewCurrencyID,
         @EffectiveMaxRows=@EffectiveMaxRows,
         @CompExpGeoBroad=@CompExpGeoBroad,
