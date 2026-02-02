@@ -52,12 +52,26 @@ End Function
 
 Private Sub DeleteFormIfExists(formName As String)
     Dim vbComp As Object
+    
+    ' 1. Unload from memory if currently running
+    Dim i As Integer
+    On Error Resume Next
+    For i = VBA.UserForms.Count - 1 To 0 Step -1
+        If VBA.UserForms(i).Name = formName Then
+            Unload VBA.UserForms(i)
+        End If
+    Next i
+    On Error GoTo 0
+    
+    ' 2. Remove component from project
     On Error Resume Next
     Set vbComp = ThisWorkbook.VBProject.VBComponents(formName)
     If Not vbComp Is Nothing Then
         ThisWorkbook.VBProject.VBComponents.Remove vbComp
     End If
     On Error GoTo 0
+    
+    DoEvents ' Allow system to process removal
 End Sub
 
 Private Function CreateUserForm(formName As String, caption As String, width As Double, height As Double) As Object
