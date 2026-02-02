@@ -165,8 +165,6 @@ ORDER BY ';
           @InvestorGroupID int,
           @AIVFundGroupID int,
           @FundTypesExclude varchar(400),
-          @AIVFundGroupID int,
-          @FundTypesExclude varchar(400),
           @ViewCurrencyID int,
           @EffectiveMaxRows int',
         @MetricName=@MetricName,

@@ -198,7 +198,6 @@ ORDER BY ';
         @InvestorGroupID=@InvestorGroupID,
         @AIVFundGroupID=@AIVFundGroupID,
         @FundTypesExclude=@FundTypesExclude,
-        @FundTypesExclude=@FundTypesExclude,
         @ViewCurrencyID=@ViewCurrencyID,
         @EffectiveMaxRows=@EffectiveMaxRows,
         @CompExpGeoBroad=@CompExpGeoBroad,
