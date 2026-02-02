@@ -6,7 +6,7 @@ Option Explicit
 ' ==========================================
 ' UPDATE THIS STRING WITH YOUR SPECIFIC SERVER DETAILS
 ' NOTE: On Mac, standard SQLOLEDB Providers do not work. You may need specific ODBC drivers.
-Private Const DB_CONNECTION_STRING As String = "Provider=SQLOLEDB;Data Source=YOUR_SERVER_NAME;Initial Catalog=YOUR_DATABASE_NAME;Integrated Security=SSPI;"
+Private Const DB_CONNECTION_STRING As String = "Provider=SQLOLEDB;Data Source=My_Server;Initial Catalog=My_Database;Integrated Security=SSPI;"
 
 ' ==========================================
 ' PUBLIC FUNCTIONS

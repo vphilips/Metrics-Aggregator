@@ -195,18 +195,34 @@ Private Sub BuildHistCashflowsForm()
     ' Buttons
     ' UPDATED: Direct call to edw.pr_usp_investor_transactions2
     
-    Dim paramCode As String
-    paramCode = ""
-    paramCode = paramCode & """@SourceTableVolVal"", Me.txtInvestor.Value, " & vbCrLf
-    paramCode = paramCode & """@MetricName"", Me.txtMetric.Value, " & vbCrLf
-    paramCode = paramCode & """@StartDate"", Me.txtFromDates.Value, " & vbCrLf
-    paramCode = paramCode & """@EndDate"", Me.txtToDates.Value, " & vbCrLf
-    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
-    paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
-    ' paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf ' Using SourceTableVolVal instead
-    paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value"
+    ' paramCode: Now contains lines like: cmd.Parameters.Append cmd.CreateParameter(...)
+    
+    Dim adoCode As String
+    adoCode = ""
+    ' @MetricName varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(Me.txtMetric.Value))" & vbCrLf
+    ' @SourceTableVolVal varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@SourceTableVolVal"", 200, 1, 100, NullIfEmpty(Me.txtInvestor.Value))" & vbCrLf
+    ' @StartDate date
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@StartDate"", 133, 1, , NullIfEmpty(Me.txtFromDates.Value))" & vbCrLf
+    ' @EndDate date
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@EndDate"", 133, 1, , NullIfEmpty(Me.txtToDates.Value))" & vbCrLf
+    ' @ViewCurrencyID int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@ViewCurrencyID"", 3, 1, , NullIfEmpty(Me.txtViewingCoy.Value))" & vbCrLf
+    ' @FilterSourceCurrency varchar(20)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@FilterSourceCurrency"", 200, 1, 20, NullIfEmpty(Me.txtCurrency.Value))" & vbCrLf
+    ' @FundTypesExclude varchar(400)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@FundTypesExclude"", 200, 1, 400, NULL)" & vbCrLf
+    ' @InvestorGroupID int (Using null for now)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@InvestorGroupID"", 3, 1, , NULL)" & vbCrLf
+    ' @AIVFundGroupID int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@AIVFundGroupID"", 3, 1, , NullIfEmpty(Me.txtAIVFundGroupID.Value))" & vbCrLf
+    ' @MaxRows int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@MaxRows"", 3, 1, , 1000)" & vbCrLf
+    ' @OrderBy varchar(20)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@OrderBy"", 200, 1, 20, ""date"")" & vbCrLf
 
-    AddButtons uf, topPos, "edw.pr_usp_investor_transactions2", paramCode, _
+    AddButtons uf, topPos, "edw.pr_usp_investor_transactions2", adoCode, _
         Array("Account", "Client", "Investor", "FromDates", "ToDates", "ViewingCoy", "Metric")
 
 End Sub
@@ -224,29 +240,34 @@ Private Sub BuildMyPerformanceForm()
     AddLabelAndText uf, topPos, "Client", "Client", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Investor", "Investor", True: topPos = topPos + 24
     ' Dates Removed
-    AddLabelAndText uf, topPos, "ViewingCoy", "Viewing Currency", True: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "ViewingCoy", "View Currency ID", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Metric", "Metric", True: topPos = topPos + 24
     
     AddLabelAndText uf, topPos, "Date", "Date", True: topPos = topPos + 24
-    AddLabelAndText uf, topPos, "Currency", "Currency", False: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "Currency", "Currency Filter", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "AIVFundGroupID", "AIV Fund Grp ID", False: topPos = topPos + 24
     AddLabelAndText uf, topPos, "InvTxnQuarter", "Inv. Txn Quarter", False: topPos = topPos + 24
     
     ' Buttons
-    ' UPDATED: Direct call to edw.pr_usp_investor_transactions2
+    ' UPDATED: Explicit ADODB Params
+    Dim adoCode As String
+    adoCode = ""
+    ' @MetricName varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(Me.txtMetric.Value))" & vbCrLf
+    ' @SourceTableVolVal varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@SourceTableVolVal"", 200, 1, 100, NullIfEmpty(Me.txtInvestor.Value))" & vbCrLf
+    ' @Date date
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@Date"", 133, 1, , NullIfEmpty(Me.txtDate.Value))" & vbCrLf
+    ' @ViewCurrencyID int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@ViewCurrencyID"", 3, 1, , NullIfEmpty(Me.txtViewingCoy.Value))" & vbCrLf
+    ' @FilterSourceCurrency varchar(20)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@FilterSourceCurrency"", 200, 1, 20, NullIfEmpty(Me.txtCurrency.Value))" & vbCrLf
+    ' @InvestorGroupID int (Using null for now or mapped?) NULL passed default
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@InvestorGroupID"", 3, 1, , NULL)" & vbCrLf
+    ' @AIVFundGroupID int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@AIVFundGroupID"", 3, 1, , NullIfEmpty(Me.txtAIVFundGroupID.Value))" & vbCrLf
     
-    Dim paramCode As String
-    paramCode = ""
-    paramCode = paramCode & """@SourceTableVolVal"", Me.txtInvestor.Value, " & vbCrLf
-    paramCode = paramCode & """@MetricName"", Me.txtMetric.Value, " & vbCrLf
-    ' Dates Removed
-    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
-    paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
-    paramCode = paramCode & """@Date"", Me.txtDate.Value, " & vbCrLf
-    ' paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf
-    paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value"
-    
-    AddButtons uf, topPos, "edw.pr_usp_investor_transactions3", paramCode, _
+    AddButtons uf, topPos, "edw.pr_usp_investor_transactions3", adoCode, _
         Array("Account", "Client", "Investor", "ViewingCoy", "Metric", "Date")
     
 End Sub
@@ -256,7 +277,6 @@ End Sub
 ' ==================================================================================
 Private Sub BuildPortfolioDiversificationForm()
     Dim uf As Object
-    ' Wider for 2 columns - Increased Height for new fields
     Set uf = CreateUserForm("ufPortfolioDiversification", "Portfolio Diversification", 650, 420)
     
     ' Column 1
@@ -264,17 +284,15 @@ Private Sub BuildPortfolioDiversificationForm()
     AddLabelAndCombobox uf, topPos1, "Account", "Account", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Client", "Client", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Investor", "Investor", True: topPos1 = topPos1 + 24
-    ' Dates Removed
-    AddLabelAndText uf, topPos1, "ViewingCoy", "Viewing Currency", True: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "ViewingCoy", "View Currency ID", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Metric", "Metric", True: topPos1 = topPos1 + 24
     
     AddLabelAndText uf, topPos1, "Date", "Date", True: topPos1 = topPos1 + 24
-    AddLabelAndText uf, topPos1, "Currency", "Currency", False: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Currency", "Currency Filter", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "AIVFundGroupID", "AIV Fund Grp ID", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "EntryFund", "Entry Fund", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Manager", "Manager", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Portfolio", "Portfolio", False: topPos1 = topPos1 + 24
-    
     
     ' Column 2
     Dim topPos2 As Double: topPos2 = 10
@@ -283,7 +301,6 @@ Private Sub BuildPortfolioDiversificationForm()
     AddLabelAndText uf, topPos2, "PortGeo", "Geography", False, 1: topPos2 = topPos2 + 24
     AddLabelAndText uf, topPos2, "PortGeoBroad", "Geo Broad", False, 1: topPos2 = topPos2 + 24
     AddLabelAndText uf, topPos2, "PortGeoL3", "Geo L3", False, 1: topPos2 = topPos2 + 24
-    ' New Field
     AddLabelAndText uf, topPos2, "PortGeoL5", "Geo L5", False, 1: topPos2 = topPos2 + 24
     
     AddLabelAndText uf, topPos2, "PortInd", "Industry", False, 1: topPos2 = topPos2 + 24
@@ -297,38 +314,56 @@ Private Sub BuildPortfolioDiversificationForm()
     Dim finalTop As Double
     finalTop = IIf(topPos1 > topPos2, topPos1, topPos2)
     
-    Dim paramCode As String
-    paramCode = ""
-    ' paramCode = paramCode & """@Account"", Me.cboAccount.Value, " & vbCrLf
-    ' paramCode = paramCode & """@Client"", Me.txtClient.Value, " & vbCrLf
-    paramCode = paramCode & """@SourceTableVolVal"", Me.txtInvestor.Value, " & vbCrLf
-    ' Dates Removed
-    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
-    paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
-    paramCode = paramCode & """@Metric"", Me.txtMetric.Value, " & vbCrLf
-    paramCode = paramCode & """@Date"", Me.txtDate.Value, " & vbCrLf
-    paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value, " & vbCrLf
-    paramCode = paramCode & """@EntryFund"", Me.txtEntryFund.Value, " & vbCrLf
-    paramCode = paramCode & """@Manager"", Me.txtManager.Value, " & vbCrLf
-    paramCode = paramCode & """@Portfolio"", Me.txtPortfolio.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioCloseYear"", Me.txtPortCloseYear.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioCommitmentYear"", Me.txtPortCommitYear.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioGeography"", Me.txtPortGeo.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioGeographyBroad"", Me.txtPortGeoBroad.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioGeographyL3"", Me.txtPortGeoL3.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioGeographyL5"", Me.txtPortGeoL5.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioIndustry"", Me.txtPortInd.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioIndustryL1"", Me.txtPortIndL1.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioStage"", Me.txtPortStage.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioStageBroad"", Me.txtPortStageBroad.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioStatus"", Me.txtPortStatus.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioTypeBroadID"", Me.txtPortTypeBroad.Value, " & vbCrLf
-    paramCode = paramCode & """@PortfolioVintageYear"", Me.txtPortVintage.Value"
+    Dim adoCode As String
+    adoCode = ""
+    ' @SourceTableVolVal varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@SourceTableVolVal"", 200, 1, 100, NullIfEmpty(Me.txtInvestor.Value))" & vbCrLf
+    ' @ViewCurrencyID int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@ViewCurrencyID"", 3, 1, , NullIfEmpty(Me.txtViewingCoy.Value))" & vbCrLf
+    ' @FilterSourceCurrency varchar(20)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@FilterSourceCurrency"", 200, 1, 20, NullIfEmpty(Me.txtCurrency.Value))" & vbCrLf
+    ' @Metric varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@Metric"", 200, 1, 100, NullIfEmpty(Me.txtMetric.Value))" & vbCrLf
+    ' @Date date
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@Date"", 133, 1, , NullIfEmpty(Me.txtDate.Value))" & vbCrLf
+    ' @AIVFundGroupID int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@AIVFundGroupID"", 3, 1, , NullIfEmpty(Me.txtAIVFundGroupID.Value))" & vbCrLf
+    ' @EntryFund varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@EntryFund"", 200, 1, 100, NullIfEmpty(Me.txtEntryFund.Value))" & vbCrLf
+    ' @Manager varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@Manager"", 200, 1, 100, NullIfEmpty(Me.txtManager.Value))" & vbCrLf
+    ' @Portfolio varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@Portfolio"", 200, 1, 100, NullIfEmpty(Me.txtPortfolio.Value))" & vbCrLf
+    ' @PortfolioCloseYear int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioCloseYear"", 3, 1, , NullIfEmpty(Me.txtPortCloseYear.Value))" & vbCrLf
+    ' @PortfolioCommitmentYear int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioCommitmentYear"", 3, 1, , NullIfEmpty(Me.txtPortCommitYear.Value))" & vbCrLf
+    ' @PortfolioGeography varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioGeography"", 200, 1, 100, NullIfEmpty(Me.txtPortGeo.Value))" & vbCrLf
+    ' @PortfolioGeographyBroad varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioGeographyBroad"", 200, 1, 100, NullIfEmpty(Me.txtPortGeoBroad.Value))" & vbCrLf
+    ' @PortfolioGeographyL3 varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioGeographyL3"", 200, 1, 100, NullIfEmpty(Me.txtPortGeoL3.Value))" & vbCrLf
+    ' @PortfolioGeographyL5 varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioGeographyL5"", 200, 1, 100, NullIfEmpty(Me.txtPortGeoL5.Value))" & vbCrLf
+    ' @PortfolioIndustry varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioIndustry"", 200, 1, 100, NullIfEmpty(Me.txtPortInd.Value))" & vbCrLf
+    ' @PortfolioIndustryL1 varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioIndustryL1"", 200, 1, 100, NullIfEmpty(Me.txtPortIndL1.Value))" & vbCrLf
+    ' @PortfolioStage varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioStage"", 200, 1, 100, NullIfEmpty(Me.txtPortStage.Value))" & vbCrLf
+    ' @PortfolioStageBroad varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioStageBroad"", 200, 1, 100, NullIfEmpty(Me.txtPortStageBroad.Value))" & vbCrLf
+    ' @PortfolioStatus varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioStatus"", 200, 1, 100, NullIfEmpty(Me.txtPortStatus.Value))" & vbCrLf
+    ' @PortfolioTypeBroadID varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioTypeBroadID"", 200, 1, 100, NullIfEmpty(Me.txtPortTypeBroad.Value))" & vbCrLf
+    ' @PortfolioVintageYear int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@PortfolioVintageYear"", 3, 1, , NullIfEmpty(Me.txtPortVintage.Value))" & vbCrLf
 
-    AddButtons uf, finalTop, "sp_GetPortfolioDiversification", paramCode, _
+    AddButtons uf, finalTop, "sp_GetPortfolioDiversification", adoCode, _
         Array("Account", "Client", "Investor", "ViewingCoy", "Metric", "Date")
 
-    
 End Sub
 
 ' ==================================================================================
@@ -344,11 +379,11 @@ Private Sub BuildCompanyDiversificationForm()
     AddLabelAndText uf, topPos1, "Client", "Client", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Investor", "Investor", True: topPos1 = topPos1 + 24
     ' Dates Removed
-    AddLabelAndText uf, topPos1, "ViewingCoy", "Viewing Currency", True: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "ViewingCoy", "View Currency ID", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Metric", "Metric", True: topPos1 = topPos1 + 24
     
     AddLabelAndText uf, topPos1, "Date", "Date", True: topPos1 = topPos1 + 24
-    AddLabelAndText uf, topPos1, "Currency", "Currency", False: topPos1 = topPos1 + 24
+    AddLabelAndText uf, topPos1, "Currency", "Currency Filter", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "AIVFundGroupID", "AIV Fund Grp ID", False: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "CoExpGeoBroad", "Co Exp Geo Broad", False: topPos1 = topPos1 + 24
     
@@ -367,33 +402,63 @@ Private Sub BuildCompanyDiversificationForm()
     Dim finalTop As Double
     finalTop = IIf(topPos1 > topPos2, topPos1, topPos2)
     
-    Dim paramCode As String
-    paramCode = ""
-    paramCode = paramCode & """@SourceTableVolVal"", Me.txtInvestor.Value, " & vbCrLf
-    ' paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf ' Using SourceTableVolVal instead
-    ' Dates Removed
-    paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
-    paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
-    paramCode = paramCode & """@MetricName"", Me.txtMetric.Value, " & vbCrLf
-    paramCode = paramCode & """@Date"", Me.txtDate.Value, " & vbCrLf
-    paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value, " & vbCrLf
-    paramCode = paramCode & """@CompExpGeoBroad"", Me.txtCoExpGeoBroad.Value, " & vbCrLf
-    paramCode = paramCode & """@CompExpGeoCountry"", Me.txtCoExpGeoCount.Value, " & vbCrLf
-    paramCode = paramCode & """@CompExpIndId"", Me.txtCoExpIndID.Value, " & vbCrLf
-    paramCode = paramCode & """@CompExpIndBroad"", Me.txtCoExpIndBroad.Value, " & vbCrLf
-    paramCode = paramCode & """@CompExpIndCategory"", Me.txtCoExpIndCat.Value, " & vbCrLf
-    paramCode = paramCode & """@CompExpInvType"", Me.txtCoExpInvType.Value, " & vbCrLf
-    paramCode = paramCode & """@CompExpInvYear"", Me.txtCoExpInvYear.Value, " & vbCrLf
-    paramCode = paramCode & """@CompExpIsPublic"", Me.txtCoExpPublic.Value, " & vbCrLf
-    paramCode = paramCode & """@CompExpStage"", Me.txtCoExpStage.Value, " & vbCrLf
-    paramCode = paramCode & """@CompExpStageBroad"", Me.txtCoExpStageBroad.Value"
+    Dim adoCode As String
+    adoCode = ""
+    ' @MetricName varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(Me.txtMetric.Value))" & vbCrLf
+    ' @SourceTableVolVal varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@SourceTableVolVal"", 200, 1, 100, NullIfEmpty(Me.txtInvestor.Value))" & vbCrLf
+    ' @Date date
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@Date"", 133, 1, , NullIfEmpty(Me.txtDate.Value))" & vbCrLf
+    ' @ViewCurrencyID int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@ViewCurrencyID"", 3, 1, , NullIfEmpty(Me.txtViewingCoy.Value))" & vbCrLf
+    ' @FilterSourceCurrency varchar(20)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@FilterSourceCurrency"", 200, 1, 20, NullIfEmpty(Me.txtCurrency.Value))" & vbCrLf
+    ' @FundTypesExclude varchar(400)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@FundTypesExclude"", 200, 1, 400, NULL)" & vbCrLf
+    ' @InvestorGroupID int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@InvestorGroupID"", 3, 1, , NULL)" & vbCrLf
+    ' @AIVFundGroupID int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@AIVFundGroupID"", 3, 1, , NullIfEmpty(Me.txtAIVFundGroupID.Value))" & vbCrLf
+    ' @MaxRows int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@MaxRows"", 3, 1, , 1000)" & vbCrLf
+    ' @OrderBy varchar(20)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@OrderBy"", 200, 1, 20, ""date"")" & vbCrLf
 
-    AddButtons uf, finalTop, "edw.pr_usp_investor_transactions_cd", paramCode, _
+    ' Company Filters
+    ' @CompExpGeoBroad varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@CompExpGeoBroad"", 200, 1, 100, NullIfEmpty(Me.txtCoExpGeoBroad.Value))" & vbCrLf
+    ' @CompExpGeoCountry varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@CompExpGeoCountry"", 200, 1, 100, NullIfEmpty(Me.txtCoExpGeoCount.Value))" & vbCrLf
+    ' @CompExpIndId varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@CompExpIndId"", 200, 1, 100, NullIfEmpty(Me.txtCoExpIndID.Value))" & vbCrLf
+    ' @CompExpIndBroad varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@CompExpIndBroad"", 200, 1, 100, NullIfEmpty(Me.txtCoExpIndBroad.Value))" & vbCrLf
+    ' @CompExpIndCategory varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@CompExpIndCategory"", 200, 1, 100, NullIfEmpty(Me.txtCoExpIndCat.Value))" & vbCrLf
+    ' @CompExpInvType varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@CompExpInvType"", 200, 1, 100, NullIfEmpty(Me.txtCoExpInvType.Value))" & vbCrLf
+    ' @CompExpInvYear int
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@CompExpInvYear"", 3, 1, , NullIfEmpty(Me.txtCoExpInvYear.Value))" & vbCrLf
+    ' @CompExpIsPublic bit - Using int (3) or boolean (11) ? bit is 11 or tinyint 17
+    ' ADODB doesn't like adBoolean often, use adInteger (3) or adTinyInt (16) if mapped to int/bit.
+    ' SP expects BIT. adBoolean (11) is best provided value is True/False.
+    ' If TextBox, it's string. "True".
+    ' Let's use adInteger (3) and assume backend casts, or adBoolean (11).
+    ' Safest is adInteger if user inputs 0/1. If user inputs "Yes/No", hard.
+    ' Assuming user inputs 0 or 1.
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@CompExpIsPublic"", 3, 1, , NullIfEmpty(Me.txtCoExpPublic.Value))" & vbCrLf
+    ' @CompExpStage varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@CompExpStage"", 200, 1, 100, NullIfEmpty(Me.txtCoExpStage.Value))" & vbCrLf
+    ' @CompExpStageBroad varchar(100)
+    adoCode = adoCode & "    cmd.Parameters.Append cmd.CreateParameter(""@CompExpStageBroad"", 200, 1, 100, NullIfEmpty(Me.txtCoExpStageBroad.Value))" & vbCrLf
+    
+    AddButtons uf, finalTop, "edw.pr_usp_investor_transactions_cd", adoCode, _
         Array("Account", "Client", "Investor", "ViewingCoy", "MetricName", "Date")
 
 End Sub
 
-Private Sub AddButtons(formComp As Object, topPos As Double, spName As String, paramCode As String, mandatoryFields As Variant)
+Private Sub AddButtons(formComp As Object, topPos As Double, spName As String, adoParamsCode As String, mandatoryFields As Variant)
     ' Add Submit and Cancel buttons and associated code
     
     Dim btnSubmit As Object, btnCancel As Object
@@ -424,6 +489,15 @@ Private Sub AddButtons(formComp As Object, topPos As Double, spName As String, p
     Dim code As String
     code = "Option Explicit" & vbCrLf & vbCrLf
     
+    ' Helper: NullIfEmpty
+    code = code & "Private Function NullIfEmpty(val As Variant) As Variant" & vbCrLf
+    code = code & "    If IsNull(val) Or Trim(val & """") = """" Then" & vbCrLf
+    code = code & "        NullIfEmpty = Null" & vbCrLf
+    code = code & "    Else" & vbCrLf
+    code = code & "        NullIfEmpty = val" & vbCrLf
+    code = code & "    End If" & vbCrLf
+    code = code & "End Function" & vbCrLf & vbCrLf
+    
     ' Cancel Logic
     code = code & "Private Sub btnCancel_Click()" & vbCrLf
     code = code & "    Unload Me" & vbCrLf
@@ -443,7 +517,7 @@ Private Sub AddButtons(formComp As Object, topPos As Double, spName As String, p
     code = code & "        Me.cboAccount.List = ws.Range(""A2:A"" & lastRow).Value" & vbCrLf
     code = code & "    End If" & vbCrLf
     code = code & "End Sub" & vbCrLf & vbCrLf
-
+    
     code = code & "Private Sub cboAccount_Change()" & vbCrLf
     code = code & "    On Error Resume Next" & vbCrLf
     code = code & "    Dim ws As Worksheet" & vbCrLf
@@ -480,20 +554,40 @@ Private Sub AddButtons(formComp As Object, topPos As Double, spName As String, p
     
     code = code & "    On Error GoTo 0" & vbCrLf & vbCrLf
     
-    ' Params Building
-    code = code & "    ' 2. Prepare Parameters" & vbCrLf
-    code = code & "    Dim pNames As Variant, pValues As Variant" & vbCrLf
-    code = code & "    BuildParams pNames, pValues, _" & vbCrLf
-    code = code & "        " & paramCode & vbCrLf & vbCrLf
-    
     ' Execution
-    code = code & "    ' 3. Execute SP" & vbCrLf
-    code = code & "    Dim rs As Object" & vbCrLf
-    code = code & "    Set rs = ExecuteSP(""" & spName & """, pNames, pValues)" & vbCrLf & vbCrLf
+    code = code & "    ' 2. Execute SP via ADODB Explicit Call" & vbCrLf
+    code = code & "    Dim conn As Object, cmd As Object, rs As Object" & vbCrLf
+    code = code & "    Set conn = modDatabase.GetConnection()" & vbCrLf
+    code = code & "    If conn Is Nothing Then Exit Sub" & vbCrLf & vbCrLf
+
+    code = code & "    Set cmd = CreateObject(""ADODB.Command"")" & vbCrLf
+    code = code & "    With cmd" & vbCrLf
+    code = code & "        .ActiveConnection = conn" & vbCrLf
+    code = code & "        .CommandText = """ & spName & """" & vbCrLf
+    code = code & "        .CommandType = 4 ' adCmdStoredProc" & vbCrLf
+                
+    ' Inject ADO Params
+    code = code & "        ' --- Parameters ---" & vbCrLf
+    code = code & adoParamsCode & vbCrLf
+    
+    code = code & "    End With" & vbCrLf & vbCrLf
+    
+    code = code & "    On Error Resume Next" & vbCrLf
+    code = code & "    Set rs = cmd.Execute" & vbCrLf
+    code = code & "    If Err.Number <> 0 Then" & vbCrLf
+    code = code & "        MsgBox ""Error executing SP: "" & Err.Description, vbCritical" & vbCrLf
+    code = code & "        conn.Close" & vbCrLf
+    code = code & "        Exit Sub" & vbCrLf
+    code = code & "    End On Error GoTo 0" & vbCrLf & vbCrLf
     
     ' Output
-    code = code & "    ' 4. Output Results" & vbCrLf
+    code = code & "    ' 3. Output Results" & vbCrLf
     code = code & "    OutputToResults rs" & vbCrLf & vbCrLf
+    code = code & "    ' Clean up" & vbCrLf
+    code = code & "    Set cmd = Nothing" & vbCrLf
+    code = code & "    conn.Close" & vbCrLf
+    code = code & "    Set conn = Nothing" & vbCrLf & vbCrLf
+    
     code = code & "    Unload Me" & vbCrLf
     code = code & "End Sub" & vbCrLf
     

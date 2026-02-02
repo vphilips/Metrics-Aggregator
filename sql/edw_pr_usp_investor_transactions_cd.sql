@@ -111,12 +111,12 @@ LEFT JOIN edw.industry ind
 -- FX JOIN 1
 LEFT JOIN edw.exchange_rates xr1
   ON xr1.from_currency_id = f.currency_id
-  AND xr1.to_currency_id = f.fund_currency_id -- Assuming fund_currency_id exists in fact_company_valuation?
+  AND xr1.to_currency_id = fund.Currency_Id -- Fixed: Get from dim_fund
   AND xr1.date_id = cal.date_id
 
 -- FX JOIN 2
 LEFT JOIN edw.exchange_rates xr2
-  ON xr2.from_currency_id = f.fund_currency_id -- verify column name
+  ON xr2.from_currency_id = fund.Currency_Id -- Fixed: Get from dim_fund
   AND xr2.to_currency_id = @ViewCurrencyID
   AND xr2.date_id = cal.date_id
 
