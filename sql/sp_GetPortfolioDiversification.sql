@@ -1,8 +1,6 @@
 CREATE OR ALTER PROCEDURE sp_GetPortfolioDiversification
     (
-        @Account varchar(100) = NULL,
-        @Client varchar(100) = NULL,
-        @Investor varchar(100) = NULL,
+        @SourceTableVolVal varchar(100) = NULL,
         -- Dates Removed
         @ViewCurrencyCode varchar(20) = 'USD',
         @FilterSourceCurrency varchar(20) = NULL,
@@ -32,8 +30,7 @@ BEGIN
     
     SELECT 
         'PortfolioDiversification' as report_type,
-        @Account as account,
-        @Client as client,
+        @SourceTableVolVal as source_table_vol_val,
         @Metric as metric,
         @FilterSourceCurrency as source_currency_filter,
         @ViewCurrencyCode as view_currency

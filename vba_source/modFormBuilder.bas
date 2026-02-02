@@ -116,6 +116,38 @@ Private Sub AddLabelAndText(formComp As Object, ByRef currentTop As Double, _
         If isMandatory Then .BackColor = RGB(255, 192, 192) ' Light Red tint for mandatory
     End With
     
+
+Private Sub AddLabelAndCombobox(formComp As Object, ByRef currentTop As Double, _
+                                fieldName As String, labelCap As String, _
+                                isMandatory As Boolean)
+    Dim leftMargin As Double: leftMargin = 10
+    Dim labelWidth As Double: labelWidth = 90
+    Dim comboWidth As Double: comboWidth = 120
+    
+    ' Add Label
+    Dim lbl As Object
+    Set lbl = formComp.Designer.Controls.Add("Forms.Label.1")
+    With lbl
+        .Caption = labelCap & IIf(isMandatory, " (*)", "")
+        .Left = leftMargin
+        .Top = currentTop + 3
+        .Width = labelWidth
+        .Height = 18
+        .Name = "lbl" & Replace(fieldName, " ", "")
+    End With
+    
+    ' Add ComboBox
+    Dim cbo As Object
+    Set cbo = formComp.Designer.Controls.Add("Forms.ComboBox.1")
+    With cbo
+        .Name = "cbo" & Replace(fieldName, " ", "")
+        .Left = leftMargin + labelWidth + 5
+        .Top = currentTop
+        .Width = comboWidth
+        .Height = 18
+        .MatchEntry = 1 ' fmMatchEntryComplete - Auto-completion
+        If isMandatory Then .BackColor = RGB(255, 192, 192)
+    End With
 End Sub
 
 Private Sub InjectCode(formComp As Object, codeText As String)
@@ -132,7 +164,7 @@ Private Sub BuildHistCashflowsForm()
     Dim topPos As Double: topPos = 10
     
     ' Fields
-    AddLabelAndText uf, topPos, "Account", "Account", True: topPos = topPos + 24
+    AddLabelAndCombobox uf, topPos, "Account", "Account", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Client", "Client", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Investor", "Investor", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "FromDates", "From Date", True: topPos = topPos + 24
@@ -151,13 +183,13 @@ Private Sub BuildHistCashflowsForm()
     
     Dim paramCode As String
     paramCode = ""
-    paramCode = paramCode & """@SourceTableVolVal"", Me.txtClient.Value, " & vbCrLf
+    paramCode = paramCode & """@SourceTableVolVal"", Me.txtInvestor.Value, " & vbCrLf
     paramCode = paramCode & """@MetricName"", Me.txtMetric.Value, " & vbCrLf
     paramCode = paramCode & """@StartDate"", Me.txtFromDates.Value, " & vbCrLf
     paramCode = paramCode & """@EndDate"", Me.txtToDates.Value, " & vbCrLf
     paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
     paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
-    paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf
+    ' paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf ' Using SourceTableVolVal instead
     paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value"
 
     AddButtons uf, topPos, "edw.pr_usp_investor_transactions2", paramCode, _
@@ -174,7 +206,7 @@ Private Sub BuildMyPerformanceForm()
     
     Dim topPos As Double: topPos = 10
     
-    AddLabelAndText uf, topPos, "Account", "Account", True: topPos = topPos + 24
+    AddLabelAndCombobox uf, topPos, "Account", "Account", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Client", "Client", True: topPos = topPos + 24
     AddLabelAndText uf, topPos, "Investor", "Investor", True: topPos = topPos + 24
     ' Dates Removed
@@ -191,13 +223,13 @@ Private Sub BuildMyPerformanceForm()
     
     Dim paramCode As String
     paramCode = ""
-    paramCode = paramCode & """@SourceTableVolVal"", Me.txtClient.Value, " & vbCrLf
+    paramCode = paramCode & """@SourceTableVolVal"", Me.txtInvestor.Value, " & vbCrLf
     paramCode = paramCode & """@MetricName"", Me.txtMetric.Value, " & vbCrLf
     ' Dates Removed
     paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
     paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
     paramCode = paramCode & """@Date"", Me.txtDate.Value, " & vbCrLf
-    paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf
+    ' paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf
     paramCode = paramCode & """@AIVFundGroupID"", Me.txtAIVFundGroupID.Value"
     
     AddButtons uf, topPos, "edw.pr_usp_investor_transactions3", paramCode, _
@@ -215,7 +247,7 @@ Private Sub BuildPortfolioDiversificationForm()
     
     ' Column 1
     Dim topPos1 As Double: topPos1 = 10
-    AddLabelAndText uf, topPos1, "Account", "Account", True: topPos1 = topPos1 + 24
+    AddLabelAndCombobox uf, topPos1, "Account", "Account", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Client", "Client", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Investor", "Investor", True: topPos1 = topPos1 + 24
     ' Dates Removed
@@ -253,9 +285,9 @@ Private Sub BuildPortfolioDiversificationForm()
     
     Dim paramCode As String
     paramCode = ""
-    paramCode = paramCode & """@Account"", Me.txtAccount.Value, " & vbCrLf
-    paramCode = paramCode & """@Client"", Me.txtClient.Value, " & vbCrLf
-    paramCode = paramCode & """@Investor"", Me.txtInvestor.Value, " & vbCrLf
+    ' paramCode = paramCode & """@Account"", Me.cboAccount.Value, " & vbCrLf
+    ' paramCode = paramCode & """@Client"", Me.txtClient.Value, " & vbCrLf
+    paramCode = paramCode & """@SourceTableVolVal"", Me.txtInvestor.Value, " & vbCrLf
     ' Dates Removed
     paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
     paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
@@ -294,7 +326,7 @@ Private Sub BuildCompanyDiversificationForm()
     
     ' Column 1
     Dim topPos1 As Double: topPos1 = 10
-    AddLabelAndText uf, topPos1, "Account", "Account", True: topPos1 = topPos1 + 24
+    AddLabelAndCombobox uf, topPos1, "Account", "Account", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Client", "Client", True: topPos1 = topPos1 + 24
     AddLabelAndText uf, topPos1, "Investor", "Investor", True: topPos1 = topPos1 + 24
     ' Dates Removed
@@ -323,8 +355,8 @@ Private Sub BuildCompanyDiversificationForm()
     
     Dim paramCode As String
     paramCode = ""
-    paramCode = paramCode & """@SourceTableVolVal"", Me.txtClient.Value, " & vbCrLf
-    paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf
+    paramCode = paramCode & """@SourceTableVolVal"", Me.txtInvestor.Value, " & vbCrLf
+    ' paramCode = paramCode & """@InvestorGroupID"", Me.txtInvestor.Value, " & vbCrLf ' Using SourceTableVolVal instead
     ' Dates Removed
     paramCode = paramCode & """@ViewCurrencyCode"", Me.txtViewingCoy.Value, " & vbCrLf
     paramCode = paramCode & """@FilterSourceCurrency"", Me.txtCurrency.Value, " & vbCrLf
@@ -343,7 +375,7 @@ Private Sub BuildCompanyDiversificationForm()
     paramCode = paramCode & """@CompExpStageBroad"", Me.txtCoExpStageBroad.Value"
 
     AddButtons uf, finalTop, "edw.pr_usp_investor_transactions_cd", paramCode, _
-        Array("Account", "Client", "Investor", "ViewingCoy", "Metric", "Date")
+        Array("Account", "Client", "Investor", "ViewingCoy", "MetricName", "Date")
 
 End Sub
 
@@ -382,6 +414,37 @@ Private Sub AddButtons(formComp As Object, topPos As Double, spName As String, p
     code = code & "Private Sub btnCancel_Click()" & vbCrLf
     code = code & "    Unload Me" & vbCrLf
     code = code & "End Sub" & vbCrLf & vbCrLf
+
+    ' ==========================================
+    ' Injected Logic for Account Dropdown & Lookup
+    ' ==========================================
+    code = code & "Private Sub UserForm_Initialize()" & vbCrLf
+    code = code & "    On Error Resume Next" & vbCrLf
+    code = code & "    Dim ws As Worksheet" & vbCrLf
+    code = code & "    Set ws = ThisWorkbook.Sheets(""database"")" & vbCrLf
+    code = code & "    If ws Is Nothing Then Exit Sub" & vbCrLf
+    code = code & "    Dim lastRow As Long" & vbCrLf
+    code = code & "    lastRow = ws.Cells(ws.Rows.Count, ""A"").End(xlUp).Row" & vbCrLf
+    code = code & "    If lastRow > 1 Then" & vbCrLf
+    code = code & "        Me.cboAccount.List = ws.Range(""A2:A"" & lastRow).Value" & vbCrLf
+    code = code & "    End If" & vbCrLf
+    code = code & "End Sub" & vbCrLf & vbCrLf
+
+    code = code & "Private Sub cboAccount_Change()" & vbCrLf
+    code = code & "    On Error Resume Next" & vbCrLf
+    code = code & "    Dim ws As Worksheet" & vbCrLf
+    code = code & "    Set ws = ThisWorkbook.Sheets(""database"")" & vbCrLf
+    code = code & "    If ws Is Nothing Then Exit Sub" & vbCrLf
+    code = code & "    Dim idx As Variant" & vbCrLf
+    code = code & "    idx = Application.Match(Me.cboAccount.Value, ws.Columns(""A""), 0)" & vbCrLf
+    code = code & "    If IsError(idx) Then" & vbCrLf
+    code = code & "        ' Me.txtClient.Value = """"" & vbCrLf
+    code = code & "        ' Me.txtInvestor.Value = """"" & vbCrLf
+    code = code & "    Else" & vbCrLf
+    code = code & "        Me.txtClient.Value = ws.Cells(idx, 4).Value  ' Column D: ClientShortName" & vbCrLf
+    code = code & "        Me.txtInvestor.Value = ws.Cells(idx, 3).Value ' Column C: AccountID (INT)" & vbCrLf
+    code = code & "    End If" & vbCrLf
+    code = code & "End Sub" & vbCrLf & vbCrLf
     
     ' Submit Logic
     code = code & "Private Sub btnSubmit_Click()" & vbCrLf
@@ -391,7 +454,11 @@ Private Sub AddButtons(formComp As Object, topPos As Double, spName As String, p
     ' Dynamic Mandatory Validation
     Dim f As Variant
     For Each f In mandatoryFields
-        code = code & "    If Not ValidateMandatory(Me.txt" & f & ", """ & f & """) Then Exit Sub" & vbCrLf
+        If f = "Account" Then
+            code = code & "    If Not ValidateMandatory(Me.cbo" & f & ", """ & f & """) Then Exit Sub" & vbCrLf
+        Else
+            code = code & "    If Not ValidateMandatory(Me.txt" & f & ", """ & f & """) Then Exit Sub" & vbCrLf
+        End If
         If InStr(1, f, "Date", vbTextCompare) > 0 Then
             code = code & "    If Not ValidateDate(Me.txt" & f & ", """ & f & """) Then Exit Sub" & vbCrLf
         End If
