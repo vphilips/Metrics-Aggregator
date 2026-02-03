@@ -78,8 +78,8 @@ BEGIN
             SET @sql += N', cal.calendar_date AS [Investor Transaction Date] ';
 
         -- "Investor Transaction Quarter"
-        IF CHARINDEX('Investor Transaction Quarter', @AttributeList) > 0
-            SET @sql += N', cq.quarter_desc AS [Investor Transaction Quarter] ';
+        -- IF CHARINDEX('Investor Transaction Quarter', @AttributeList) > 0
+            -- SET @sql += N', cq.quarter_desc AS [Investor Transaction Quarter] ';
 
         -- "Client" (If requested, derived logic)
         IF CHARINDEX('Client', @AttributeList) > 0
@@ -101,7 +101,7 @@ BEGIN
     JOIN edw.dim_investor inv ON f.investor_name_id = inv.investor_name_id
     JOIN edw.dim_fund fund ON f.fund_id = fund.fund_id
     LEFT JOIN edw.calendar cal ON f.date_id = cal.date_id
-    LEFT JOIN edw.calendar_quarter cq ON cal.calendar_quarter_id = cq.calendar_quarter_id -- Adjusted column name
+    -- LEFT JOIN edw.calendar_quarter cq ON cal.calendar_quarter_id = cq.calendar_quarter_id -- Adjusted column name
     LEFT JOIN edw.currency jc ON f.fund_currency_id = jc.Currency_Id
     LEFT JOIN edw.dim_investor grp ON (CASE WHEN inv.Part_Of_HV_Staff=1 THEN 1444282 ELSE inv.Parent_Investor_Id END) = grp.investor_name_id
     
@@ -135,10 +135,6 @@ BEGIN
         -- Date
         IF CHARINDEX('Investor Transaction Date', @AttributeList) > 0
              SET @groupBy += N', cal.calendar_date ';
-
-        -- Quarter
-        IF CHARINDEX('Investor Transaction Quarter', @AttributeList) > 0
-             SET @groupBy += N', cq.quarter_desc ';
 
         -- Client
         IF CHARINDEX('Client', @AttributeList) > 0
