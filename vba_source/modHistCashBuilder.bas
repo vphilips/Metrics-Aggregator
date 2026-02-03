@@ -347,11 +347,11 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String)
     code = code & "        .CommandType = 4" & vbCrLf
     code = code & "        " & vbCrLf
     code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
-    code = code & "        .Parameters.Append .CreateParameter(""@SourceTableVolVal"", 200, 1, 2147483647, NullIfEmpty(strAccountKeys))" & vbCrLf
+    code = code & "        .Parameters.Append .CreateParameter(""@SourceTableVolVal"", 201, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
     code = code & "        .Parameters.Append .CreateParameter(""@StartDate"", 133, 1, , ParseDateForDB(Me.txtFromDate.Value))" & vbCrLf
     code = code & "        .Parameters.Append .CreateParameter(""@EndDate"", 133, 1, , ParseDateForDB(Me.txtToDate.Value))" & vbCrLf
-    code = code & "        .Parameters.Append .CreateParameter(""@AttributeList"", 200, 1, 2147483647, NullIfEmpty(m_AttributesStr))" & vbCrLf
-    code = code & "        .Parameters.Append .CreateParameter(""@ViewCurrencyID"", 3, 1, , 1)" & vbCrLf
+    code = code & "        .Parameters.Append .CreateParameter(""@AttributeList"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
+    code = code & "        .Parameters.Append .CreateParameter(""@ViewCurrencyID"", 3, 1, 4, 1)" & vbCrLf
     code = code & "    End With" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    On Error Resume Next" & vbCrLf
