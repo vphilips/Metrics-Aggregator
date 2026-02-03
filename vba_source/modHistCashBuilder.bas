@@ -351,7 +351,11 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String)
     code = code & "        .Parameters.Append .CreateParameter(""@StartDate"", 133, 1, , ParseDateForDB(Me.txtFromDate.Value))" & vbCrLf
     code = code & "        .Parameters.Append .CreateParameter(""@EndDate"", 133, 1, , ParseDateForDB(Me.txtToDate.Value))" & vbCrLf
     code = code & "        .Parameters.Append .CreateParameter(""@AttributeList"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
-    code = code & "        .Parameters.Append .CreateParameter(""@ViewCurrencyID"", 3, 1, 4, 1)" & vbCrLf
+    code = code & "        " & vbCrLf
+    code = code & "        ' Currency Loookup" & vbCrLf
+    code = code & "        Dim ccyID As Long" & vbCrLf
+    code = code & "        ccyID = GetCurrencyID(Me.txtCurrency.Value)" & vbCrLf
+    code = code & "        .Parameters.Append .CreateParameter(""@ViewCurrencyID"", 3, 1, 4, ccyID)" & vbCrLf
     code = code & "    End With" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    On Error Resume Next" & vbCrLf

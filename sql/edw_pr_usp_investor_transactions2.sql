@@ -49,16 +49,7 @@ BEGIN
     IF @AttributeList IS NOT NULL AND @AttributeList <> ''
     BEGIN
         -- Investor
-        IF CHARINDEX('Investor', @AttributeList) > 0 AND CHARINDEX('Fund Investor', @AttributeList) = 0 AND CHARINDEX('Investor Transaction', @AttributeList) = 0
-        BEGIN 
-             -- Strict check to avoid substring matches? Or assume duplicates fine?
-             -- "Investor" is a substring of "Investor Transaction Date". 
-             -- User format: "Investor, Fund Investor Presentation AIV, ..."
-             -- Implementation: Search for exact token or robust check. 
-             -- For now, simple LIKE with delimiters is safer but CHARINDEX is requested style.
-             -- I'll use specific checks.
-             NULL; -- Logic below
-        END
+
         
         -- Simplification: Just check if the string exists. If columns duplicate, SQL handles alias? No.
         -- Better to wrap keys in delimiters for checking. set @Atts = ',' + @AttributeList + ','
