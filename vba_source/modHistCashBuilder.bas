@@ -296,6 +296,30 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String)
     code = code & "    GetAccountKeys = s" & vbCrLf
     code = code & "End Function" & vbCrLf & vbCrLf
 
+    ' --- HELPERS FOR DATES ---
+    code = code & "Private Function ParseDateForDB(val As Variant) As Variant" & vbCrLf
+    code = code & "    If IsNull(val) Or Trim(val & """") = """" Then" & vbCrLf
+    code = code & "        ParseDateForDB = Null" & vbCrLf
+    code = code & "    Else" & vbCrLf
+    code = code & "        Dim s As String" & vbCrLf
+    code = code & "        s = Trim(val)" & vbCrLf
+    code = code & "        ' Remove single quotes" & vbCrLf
+    code = code & "        s = Replace(s, ""'"", """")" & vbCrLf
+    code = code & "        " & vbCrLf
+    code = code & "        If IsDate(s) Then" & vbCrLf
+    code = code & "            ParseDateForDB = CDate(s)" & vbCrLf
+    code = code & "        ElseIf IsNumeric(s) Then" & vbCrLf
+    code = code & "            ' Handle Excel serial numbers" & vbCrLf
+    code = code & "            On Error Resume Next" & vbCrLf
+    code = code & "            ParseDateForDB = CDate(CDbl(s))" & vbCrLf
+    code = code & "            If Err.Number <> 0 Then ParseDateForDB = Null" & vbCrLf
+    code = code & "            On Error GoTo 0" & vbCrLf
+    code = code & "        Else" & vbCrLf
+    code = code & "            ParseDateForDB = Null" & vbCrLf
+    code = code & "        End If" & vbCrLf
+    code = code & "    End If" & vbCrLf
+    code = code & "End Function" & vbCrLf & vbCrLf
+
     ' --- SUBMIT ---
     code = code & "Private Sub btnSubmit_Click()" & vbCrLf
     code = code & "    ' Validate" & vbCrLf
