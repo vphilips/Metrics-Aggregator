@@ -32,7 +32,7 @@ Public Sub BuildHistCashNewForm()
     AddLabelAndText uf, topPos, "Currency", "Currency", True: topPos = topPos + 24
     
     ' 4. Inject Logic
-    InjectCascadingLogic uf, "edw.pr_usp_investor_transactions2"
+    InjectCascadingLogic uf, "edw.pr_usp_investor_transactions_multi"
     
     Application.ScreenUpdating = True
     MsgBox "frmHistCashNew (Cascading) has been created!", vbInformation
@@ -236,80 +236,15 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String)
     code = code & "    Next i" & vbCrLf
     code = code & "End Sub" & vbCrLf & vbCrLf
     
-    ' --- HELPERS FOR LOOKUPS ---
-    code = code & "Private Function GetMetricFromVariable(varName As String) As String" & vbCrLf
-    code = code & "    On Error Resume Next" & vbCrLf
-    code = code & "    Dim ws As Worksheet, rng As Range, f As Range" & vbCrLf
-    code = code & "    Set ws = ThisWorkbook.Sheets(""variable_metric_map"")" & vbCrLf
-    code = code & "    If ws Is Nothing Then GetMetricFromVariable = varName: Exit Function" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    ' Assumes Variable in Col A, Metric in Col B" & vbCrLf
-    code = code & "    Set rng = ws.Range(""A:A"")" & vbCrLf
-    code = code & "    Set f = rng.Find(What:=varName, LookIn:=xlValues, LookAt:=xlWhole)" & vbCrLf
-    code = code & "    If Not f Is Nothing Then" & vbCrLf
-    code = code & "        GetMetricFromVariable = f.Offset(0, 1).Value" & vbCrLf
-    code = code & "    Else" & vbCrLf
-    code = code & "        GetMetricFromVariable = varName ' Fallback" & vbCrLf
-    code = code & "    End If" & vbCrLf
-    code = code & "End Function" & vbCrLf & vbCrLf
-
-    code = code & "Private Function GetAccountKeys(lst As Object) As String" & vbCrLf
-    code = code & "    ' 1. Load Account Map (Name -> Key) into Dictionary for speed" & vbCrLf
-    code = code & "    Dim dict As Object" & vbCrLf
-    code = code & "    Set dict = CreateObject(""Scripting.Dictionary"")" & vbCrLf
-    code = code & "    dict.CompareMode = 1 ' TextCompare" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    Dim ws As Worksheet, arr As Variant, i As Long, lastRow As Long" & vbCrLf
-    code = code & "    Set ws = ThisWorkbook.Sheets(""database"")" & vbCrLf
-    code = code & "    If ws Is Nothing Then MsgBox ""Database sheet missing!"": Exit Function" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    lastRow = ws.Cells(ws.Rows.Count, ""A"").End(xlUp).Row" & vbCrLf
-    code = code & "    If lastRow >= 2 Then" & vbCrLf
-    code = code & "        arr = ws.Range(""A2:B"" & lastRow).Value ' A=Name, B=Key" & vbCrLf
-    code = code & "        For i = 1 To UBound(arr, 1)" & vbCrLf
-    code = code & "            If Not IsError(arr(i, 1)) And Not IsEmpty(arr(i, 1)) Then" & vbCrLf
-    code = code & "                If Not dict.Exists(arr(i, 1)) Then dict.Add arr(i, 1), arr(i, 2)" & vbCrLf
-    code = code & "            End If" & vbCrLf
-    code = code & "        Next i" & vbCrLf
-    code = code & "    End If" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    ' 2. Map Selected Items" & vbCrLf
-    code = code & "    Dim s As String, key As Variant, accName As String" & vbCrLf
-    code = code & "    s = """"" & vbCrLf
-    code = code & "    For i = 0 To lst.ListCount - 1" & vbCrLf
-    code = code & "        If lst.Selected(i) Then" & vbCrLf
-    code = code & "            accName = lst.List(i)" & vbCrLf
-    code = code & "            If dict.Exists(accName) Then" & vbCrLf
-    code = code & "                s = s & dict(accName) & "",""" & vbCrLf
-    code = code & "            Else" & vbCrLf
-    code = code & "                ' If Key missing, use Name?? User said use Key. " & vbCrLf
-    code = code & "                ' We will warn logic or just append Name if no key found (safer fallback)?" & vbCrLf
-    code = code & "                ' User requested Account Key. If invalid, SP might fail." & vbCrLf
-    code = code & "                ' Let's append the key if found, skip if not? Or append name?" & vbCrLf
-    code = code & "                ' We'll append name as fallback." & vbCrLf
-    code = code & "                s = s & accName & "",""" & vbCrLf
-    code = code & "            End If" & vbCrLf
-    code = code & "        End If" & vbCrLf
-    code = code & "    Next i" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    If Len(s) > 0 Then s = Left(s, Len(s) - 1)" & vbCrLf
-    code = code & "    GetAccountKeys = s" & vbCrLf
-    code = code & "End Function" & vbCrLf & vbCrLf
-
     ' --- SUBMIT ---
     code = code & "Private Sub btnSubmit_Click()" & vbCrLf
     code = code & "    ' Validate" & vbCrLf
     code = code & "    If Me.cboVariableName.Value = """" Then MsgBox ""Variable required"": Exit Sub" & vbCrLf
     code = code & "    If Me.cboClient.Value = """" Then MsgBox ""Client required"": Exit Sub" & vbCrLf
     code = code & "    " & vbCrLf
-    code = code & "    ' 1. Get Metric Name" & vbCrLf
-    code = code & "    Dim finalMetric As String" & vbCrLf
-    code = code & "    finalMetric = GetMetricFromVariable(Me.cboVariableName.Value)" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    ' 2. Get Account Keys" & vbCrLf
-    code = code & "    Dim strAccountKeys As String" & vbCrLf
-    code = code & "    strAccountKeys = GetAccountKeys(Me.lstAccounts)" & vbCrLf
-    code = code & "    If strAccountKeys = """" Then MsgBox ""Select at least one Account"": Exit Sub" & vbCrLf
+    code = code & "    Dim strAccounts As String" & vbCrLf
+    code = code & "    strAccounts = GetSelectedItems(Me.lstAccounts)" & vbCrLf
+    code = code & "    If strAccounts = """" Then MsgBox ""Select at least one Account"": Exit Sub" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    ' Execute" & vbCrLf
     code = code & "    Dim conn As Object, cmd As Object, rs As Object" & vbCrLf
@@ -322,8 +257,8 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String)
     code = code & "        .CommandText = """ & spName & """" & vbCrLf
     code = code & "        .CommandType = 4" & vbCrLf
     code = code & "        " & vbCrLf
-    code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
-    code = code & "        .Parameters.Append .CreateParameter(""@SourceTableVolVal"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
+    code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(Me.cboVariableName.Value))" & vbCrLf
+    code = code & "        .Parameters.Append .CreateParameter(""@SourceTableVolVal"", 200, 1, -1, NullIfEmpty(strAccounts))" & vbCrLf
     code = code & "        .Parameters.Append .CreateParameter(""@StartDate"", 133, 1, , NullIfEmpty(Me.txtFromDate.Value))" & vbCrLf
     code = code & "        .Parameters.Append .CreateParameter(""@EndDate"", 133, 1, , NullIfEmpty(Me.txtToDate.Value))" & vbCrLf
     code = code & "        .Parameters.Append .CreateParameter(""@AttributeList"", 200, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
