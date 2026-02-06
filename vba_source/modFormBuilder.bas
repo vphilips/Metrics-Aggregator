@@ -12,7 +12,8 @@ Public Sub BuildAllUserForms()
     Application.ScreenUpdating = False
     
     ' 1. Historical Cashflows
-    modHistCashBuilder.BuildDynamicForm "Historical Cashflows", "Historical Cashflows", "edw.pr_usp_investor_transactions2"
+    ' Updated SP: edw.usp_HistoricalCashflowReport_Aggregated
+    modHistCashBuilder.BuildDynamicForm "Historical Cashflows", "Historical Cashflows", "edw.usp_HistoricalCashflowReport_Aggregated"
     
     ' 2. My Performance
     modHistCashBuilder.BuildDynamicForm "My Performance", "My Performance", "edw.pr_usp_investor_transactions3"
@@ -42,7 +43,7 @@ End Function
 
 ' Legacy wrappers (optional, kept for compatibility if buttons invoke these directly)
 Public Sub BuildHistCashflowsForm()
-    modHistCashBuilder.BuildDynamicForm "Historical Cashflows", "Historical Cashflows", "edw.pr_usp_investor_transactions2"
+    modHistCashBuilder.BuildDynamicForm "Historical Cashflows", "Historical Cashflows", "edw.usp_HistoricalCashflowReport_Aggregated"
 End Sub
 
 Public Sub BuildMyPerformanceForm()

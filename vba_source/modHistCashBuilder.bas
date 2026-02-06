@@ -288,7 +288,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "End Function" & vbCrLf & vbCrLf
 
     code = code & "Private Function GetAccountKeys(lst As Object) As String" & vbCrLf
-    code = code & "    ' 1. Load Account Map (Name -> Key) into Dictionary for speed" & vbCrLf
+    code = code & "    ' 1. Load Account Map (Name -> GlobalID) into Dictionary for speed" & vbCrLf
     code = code & "    Dim dict As Object" & vbCrLf
     code = code & "    Set dict = CreateObject(""Scripting.Dictionary"")" & vbCrLf
     code = code & "    dict.CompareMode = 1 ' TextCompare" & vbCrLf
@@ -299,15 +299,17 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    " & vbCrLf
     code = code & "    lastRow = ws.Cells(ws.Rows.Count, ""A"").End(xlUp).Row" & vbCrLf
     code = code & "    If lastRow >= 2 Then" & vbCrLf
-    code = code & "        arr = ws.Range(""A2:B"" & lastRow).Value ' A=Name, B=Key" & vbCrLf
+    code = code & "        ' Read Columns A through C" & vbCrLf
+    code = code & "        arr = ws.Range(""A2:C"" & lastRow).Value ' A=Name, B=Key, C=GlobalID" & vbCrLf
     code = code & "        For i = 1 To UBound(arr, 1)" & vbCrLf
     code = code & "            If Not IsError(arr(i, 1)) And Not IsEmpty(arr(i, 1)) Then" & vbCrLf
-    code = code & "                If Not dict.Exists(arr(i, 1)) Then dict.Add arr(i, 1), arr(i, 2)" & vbCrLf
+    code = code & "                ' Map Name (Col 1) to GlobalID (Col 3)" & vbCrLf
+    code = code & "                If Not dict.Exists(arr(i, 1)) Then dict.Add arr(i, 1), arr(i, 3)" & vbCrLf
     code = code & "            End If" & vbCrLf
     code = code & "        Next i" & vbCrLf
     code = code & "    End If" & vbCrLf
     code = code & "    " & vbCrLf
-    code = code & "    ' 2. Map Selected Items" & vbCrLf
+    code = code & "    ' 2. Map Selected items" & vbCrLf
     code = code & "    Dim s As String, key As Variant, accName As String" & vbCrLf
     code = code & "    s = """"" & vbCrLf
     code = code & "    For i = 0 To lst.ListCount - 1" & vbCrLf
@@ -347,6 +349,41 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    End If" & vbCrLf
     code = code & "End Function" & vbCrLf & vbCrLf
 
+    ' --- HELPER: DATE INT (YYYYMMDD) ---
+    code = code & "Private Function ParseDateToInt(val As Variant) As Variant" & vbCrLf
+    code = code & "    If IsNull(val) Or Trim(val & """") = """" Then" & vbCrLf
+    code = code & "        ParseDateToInt = Null" & vbCrLf
+    code = code & "    Else" & vbCrLf
+    code = code & "        Dim s As String" & vbCrLf
+    code = code & "        s = Trim(val)" & vbCrLf
+    code = code & "        If IsDate(s) Then" & vbCrLf
+    code = code & "            ParseDateToInt = CLng(Format(CDate(s), ""yyyymmdd""))" & vbCrLf
+    code = code & "        ElseIf IsNumeric(s) And Len(s) = 8 Then" & vbCrLf
+    code = code & "            ParseDateToInt = CLng(s)" & vbCrLf
+    code = code & "        Else" & vbCrLf
+    code = code & "            ParseDateToInt = Null" & vbCrLf
+    code = code & "        End If" & vbCrLf
+    code = code & "    End If" & vbCrLf
+    code = code & "End Function" & vbCrLf & vbCrLf
+
+    ' --- HELPER: CURRENCY LOOKUP ---
+    code = code & "Private Function GetCurrencyID(ccyName As String) As Long" & vbCrLf
+    code = code & "    On Error Resume Next" & vbCrLf
+    code = code & "    Dim ws As Worksheet, rng As Range, f As Range" & vbCrLf
+    code = code & "    Set ws = ThisWorkbook.Sheets(""ccy_map"")" & vbCrLf
+    code = code & "    If ws Is Nothing Then GetCurrencyID = 0: Exit Function" & vbCrLf
+    code = code & "    " & vbCrLf
+    code = code & "    ' Look for Currency Code in Col A" & vbCrLf
+    code = code & "    Set rng = ws.Range(""A:A"")" & vbCrLf
+    code = code & "    Set f = rng.Find(What:=Trim(ccyName), LookIn:=xlValues, LookAt:=xlWhole)" & vbCrLf
+    code = code & "    " & vbCrLf
+    code = code & "    If Not f Is Nothing Then" & vbCrLf
+    code = code & "        GetCurrencyID = CLng(f.Offset(0, 1).Value) ' Col B has ID" & vbCrLf
+    code = code & "    Else" & vbCrLf
+    code = code & "        GetCurrencyID = 0 ' Not found" & vbCrLf
+    code = code & "    End If" & vbCrLf
+    code = code & "End Function" & vbCrLf & vbCrLf
+
     ' --- SUBMIT ---
     code = code & "Private Sub btnSubmit_Click()" & vbCrLf
     code = code & "    ' Validate" & vbCrLf
@@ -357,7 +394,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    Dim finalMetric As String" & vbCrLf
     code = code & "    finalMetric = GetMetricFromVariable(Me.cboVariableName.Value)" & vbCrLf
     code = code & "    " & vbCrLf
-    code = code & "    ' 2. Get Account Keys" & vbCrLf
+    code = code & "    ' 2. Get Account Keys (GLOBAL IDs for ALL forms)" & vbCrLf
     code = code & "    Dim strAccountKeys As String" & vbCrLf
     code = code & "    strAccountKeys = GetAccountKeys(Me.lstAccounts)" & vbCrLf
     code = code & "    If strAccountKeys = """" Then MsgBox ""Select at least one Account"": Exit Sub" & vbCrLf
@@ -373,22 +410,87 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "        .CommandText = """ & spName & """" & vbCrLf
     code = code & "        .CommandType = 4" & vbCrLf
     code = code & "        " & vbCrLf
-    code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
-    code = code & "        .Parameters.Append .CreateParameter(""@SourceTableVolVal"", 201, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
     
     If FormType = "Historical Cashflows" Then
+        ' SP: edw.usp_HistoricalCashflowReport_Aggregated
+        ' Params: @Metric, @InvestorIdsCsv, @StartDate, @EndDate, @ReportingCurrencyId, @OutputFieldsCsv
+        
+        code = code & "        .Parameters.Append .CreateParameter(""@Metric"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@InvestorIdsCsv"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@StartDate"", 133, 1, , ParseDateForDB(Me.txtFromDate.Value))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@EndDate"", 133, 1, , ParseDateForDB(Me.txtToDate.Value))" & vbCrLf
-    Else
-        code = code & "        .Parameters.Append .CreateParameter(""@Date"", 133, 1, , ParseDateForDB(Me.txtAsofDate.Value))" & vbCrLf
-    End If
+        
+        ' Currency ID
+        code = code & "        Dim ccyID As Long" & vbCrLf
+        code = code & "        ccyID = GetCurrencyID(Me.txtCurrency.Value)" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@ReportingCurrencyId"", 3, 1, 4, ccyID)" & vbCrLf
+        
+        ' OutputFieldsCsv (Attributes)
+        code = code & "        .Parameters.Append .CreateParameter(""@OutputFieldsCsv"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
 
-    code = code & "        .Parameters.Append .CreateParameter(""@AttributeList"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
-    code = code & "        " & vbCrLf
-    code = code & "        ' Currency Loookup" & vbCrLf
-    code = code & "        Dim ccyID As Long" & vbCrLf
-    code = code & "        ccyID = GetCurrencyID(Me.txtCurrency.Value)" & vbCrLf
-    code = code & "        .Parameters.Append .CreateParameter(""@ViewCurrencyID"", 3, 1, 4, ccyID)" & vbCrLf
+    ElseIf FormType = "Company Diversification" Then
+        ' SP: edw.usp_CompanyDiversification_Aggregated
+        ' Params needed: @MetricName, @InvestorNameIdsCsv, @AsOfDate, @ReportingCurrencyId, @OutputFieldsCsv
+        
+        code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameIdsCsv"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 133, 1, , ParseDateForDB(Me.txtAsofDate.Value))" & vbCrLf
+        
+        ' Currency ID
+        code = code & "        Dim ccyID As Long" & vbCrLf
+        code = code & "        ccyID = GetCurrencyID(Me.txtCurrency.Value)" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@ReportingCurrencyId"", 3, 1, 4, ccyID)" & vbCrLf
+        
+        ' OutputFieldsCsv
+        code = code & "        .Parameters.Append .CreateParameter(""@OutputFieldsCsv"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
+
+    ElseIf FormType = "My Performance" Then
+        ' SP: edw.usp_InvestorPerformance_Aggregated
+        ' Params: @MetricName, @InvestorNameIds, @AsOfDate (INT YYYYMMDD), @ReportingCurrency (STRING), @OutputFields (Not CSV)
+        
+        code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameIds"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
+        
+        ' Date as INT
+        code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 3, 1, 4, ParseDateToInt(Me.txtAsofDate.Value))" & vbCrLf
+        
+        ' Currency as String (NOT ID)
+        code = code & "        .Parameters.Append .CreateParameter(""@ReportingCurrency"", 200, 1, 10, Me.txtCurrency.Value)" & vbCrLf
+        
+        ' OutputFields (Note: Screenshot says @OutputFields, not @OutputFieldsCsv)
+        code = code & "        .Parameters.Append .CreateParameter(""@OutputFields"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
+
+    ElseIf FormType = "Portfolio Diversification" Then
+        ' SP: edw.usp_PortfolioDiversification_Aggregated
+        ' Params: @Metric, @InvestorNameIdsCsv, @AsOfDate (INT), @ReportingCurrencyId (INT), @OutputFieldsCsv
+        
+        code = code & "        .Parameters.Append .CreateParameter(""@Metric"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameIdsCsv"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
+        
+        ' Date as INT
+        code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 3, 1, 4, ParseDateToInt(Me.txtAsofDate.Value))" & vbCrLf
+        
+        ' Currency ID
+        code = code & "        Dim ccyID As Long" & vbCrLf
+        code = code & "        ccyID = GetCurrencyID(Me.txtCurrency.Value)" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@ReportingCurrencyId"", 3, 1, 4, ccyID)" & vbCrLf
+        
+        ' OutputFieldsCsv
+        code = code & "        .Parameters.Append .CreateParameter(""@OutputFieldsCsv"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
+
+    Else
+        ' Legacy / Other Forms Mapping
+        code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@SourceTableVolVal"", 201, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
+        
+        code = code & "        .Parameters.Append .CreateParameter(""@Date"", 133, 1, , ParseDateForDB(Me.txtAsofDate.Value))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@AttributeList"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
+        
+        code = code & "        Dim ccyID As Long" & vbCrLf
+        code = code & "        ccyID = GetCurrencyID(Me.txtCurrency.Value)" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@ViewCurrencyID"", 3, 1, 4, ccyID)" & vbCrLf
+    End If
+    
     code = code & "    End With" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    On Error Resume Next" & vbCrLf
