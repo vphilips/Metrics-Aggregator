@@ -246,7 +246,9 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "        accRaw = ws.Cells(r, 3).Value" & vbCrLf
     code = code & "        If Not IsError(accRaw) And Not IsEmpty(accRaw) Then" & vbCrLf
     code = code & "            Dim parts() As String" & vbCrLf
-    code = code & "            parts = Split(CStr(accRaw), "";"")" & vbCrLf
+    code = code & "            Dim cleanRaw As String" & vbCrLf
+    code = code & "            cleanRaw = Replace(CStr(accRaw), "","", "","") ' Handle commas too" & vbCrLf
+    code = code & "            parts = Split(cleanRaw, "";"")" & vbCrLf
     code = code & "            Dim p As Variant" & vbCrLf
     code = code & "            For Each p In parts" & vbCrLf
     code = code & "                Me.lstAccounts.AddItem Trim(p)" & vbCrLf
@@ -289,11 +291,12 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    " & vbCrLf
     code = code & "    ' Assumes Variable in Col A, Metric in Col B" & vbCrLf
     code = code & "    Set rng = ws.Range(""A:A"")" & vbCrLf
-    code = code & "    Set f = rng.Find(What:=varName, LookIn:=xlValues, LookAt:=xlWhole)" & vbCrLf
+    code = code & "    Set f = rng.Find(What:=Trim(varName), LookIn:=xlValues, LookAt:=xlWhole)" & vbCrLf
     code = code & "    If Not f Is Nothing Then" & vbCrLf
     code = code & "        GetMetricFromVariable = f.Offset(0, 1).Value" & vbCrLf
     code = code & "    Else" & vbCrLf
-    code = code & "        GetMetricFromVariable = varName ' Fallback" & vbCrLf
+    code = code & "        MsgBox ""Variable '"" & varName & ""' not found in 'variable_metric_map' sheet."", vbCritical" & vbCrLf
+    code = code & "        GetMetricFromVariable = """"" & vbCrLf
     code = code & "    End If" & vbCrLf
     code = code & "End Function" & vbCrLf & vbCrLf
 
@@ -412,6 +415,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    ' 1. Get Metric Name" & vbCrLf
     code = code & "    Dim finalMetric As String" & vbCrLf
     code = code & "    finalMetric = GetMetricFromVariable(Me.cboVariableName.Value)" & vbCrLf
+    code = code & "    If finalMetric = """" Then Exit Sub" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    ' 2. Get Account Keys (GLOBAL IDs for ALL forms)" & vbCrLf
     code = code & "    Dim hasSelection As Boolean: hasSelection = False" & vbCrLf
