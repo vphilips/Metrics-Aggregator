@@ -166,7 +166,14 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     ' Logic to find the correct column based on FormType
     code = code & "    Dim headerRng As Range, found As Range, colIndex As Long" & vbCrLf
     code = code & "    Set headerRng = ws.Range(""1:1"")" & vbCrLf
-    code = code & "    Set found = headerRng.Find(What:=""" & FormType & """, LookIn:=xlValues, LookAt:=xlWhole)" & vbCrLf
+    If FormType = "Company Diversification" Then
+        ' Handle known typo in Excel sheet header: "Company Diverisification"
+        code = code & "    Set found = headerRng.Find(What:=""Company Diverisification"", LookIn:=xlValues, LookAt:=xlWhole)" & vbCrLf
+        ' Fallback to correct spelling just in case it gets fixed later
+        code = code & "    If found Is Nothing Then Set found = headerRng.Find(What:=""Company Diversification"", LookIn:=xlValues, LookAt:=xlWhole)" & vbCrLf
+    Else
+        code = code & "    Set found = headerRng.Find(What:=""" & FormType & """, LookIn:=xlValues, LookAt:=xlWhole)" & vbCrLf
+    End If
     code = code & "    If found Is Nothing Then MsgBox ""Column '" & FormType & "' not found in form_metrics!"": Exit Sub" & vbCrLf
     code = code & "    colIndex = found.Column" & vbCrLf
     code = code & "    " & vbCrLf
@@ -247,18 +254,15 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
         code = code & "        Me.txtFromDate.Value = ws.Cells(r, 5).Value ' Col E" & vbCrLf
         code = code & "        Me.txtToDate.Value = ws.Cells(r, 6).Value   ' Col F" & vbCrLf
     Else
-        ' Assuming the Single Date is in Col E and Col F is ignored? 
-        ' Or Col F is the single date? Let's assume Col F (EndDate) is the 'AsOf' date usually.
-        ' User prompt says: Start Date and End Date replaced by 'Asof Date'.
-        ' Let's use Column F (ToDate) as the default mapping for AsOfDate, or E? 
-        ' Usually 'AsOf' is the end of period. So mapping to Col F (ToDate) makes sense.
-        code = code & "        Me.txtAsofDate.Value = ws.Cells(r, 6).Value   ' Col F maps to Asof" & vbCrLf
+        ' As of Date is now in Col D (4)
+        code = code & "        Me.txtAsofDate.Value = ws.Cells(r, 4).Value   ' Col D maps to Asof" & vbCrLf
     End If
     
-    code = code & "        Me.txtCurrency.Value = ws.Cells(r, 7).Value ' Col G" & vbCrLf
+    ' Currency is in Col H (8)
+    code = code & "        Me.txtCurrency.Value = ws.Cells(r, 8).Value ' Col H" & vbCrLf
     code = code & "        " & vbCrLf
-    code = code & "        ' 3. Capture Attributes (Col H)" & vbCrLf
-    code = code & "        m_AttributesStr = ws.Cells(r, 8).Value" & vbCrLf
+    ' Attributes (Output Fields) is in Col G (7)
+    code = code & "        m_AttributesStr = ws.Cells(r, 7).Value ' Col G" & vbCrLf
     code = code & "    End If" & vbCrLf
     code = code & "End Sub" & vbCrLf & vbCrLf
     
