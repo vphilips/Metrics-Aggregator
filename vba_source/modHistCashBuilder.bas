@@ -247,7 +247,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "        If Not IsError(accRaw) And Not IsEmpty(accRaw) Then" & vbCrLf
     code = code & "            Dim parts() As String" & vbCrLf
     code = code & "            Dim cleanRaw As String" & vbCrLf
-    code = code & "            cleanRaw = Replace(CStr(accRaw), "","", "","") ' Handle commas too" & vbCrLf
+    code = code & "            cleanRaw = Replace(CStr(accRaw), "","", "";"") ' Handle commas too" & vbCrLf
     code = code & "            parts = Split(cleanRaw, "";"")" & vbCrLf
     code = code & "            Dim p As Variant" & vbCrLf
     code = code & "            For Each p In parts" & vbCrLf
@@ -293,7 +293,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    Set rng = ws.Range(""A:A"")" & vbCrLf
     code = code & "    Set f = rng.Find(What:=Trim(varName), LookIn:=xlValues, LookAt:=xlWhole)" & vbCrLf
     code = code & "    If Not f Is Nothing Then" & vbCrLf
-    code = code & "        GetMetricFromVariable = f.Offset(0, 1).Value" & vbCrLf
+    code = code & "        GetMetricFromVariable = SafeStr(f.Offset(0, 1).Value)" & vbCrLf
     code = code & "    Else" & vbCrLf
     code = code & "        MsgBox ""Variable '"" & varName & ""' not found in 'variable_metric_map' sheet."", vbCritical" & vbCrLf
     code = code & "        GetMetricFromVariable = """"" & vbCrLf
@@ -527,7 +527,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    On Error Resume Next" & vbCrLf
     code = code & "    Set rs = cmd.Execute" & vbCrLf
     code = code & "    If Err.Number <> 0 Then" & vbCrLf
-    code = code & "        MsgBox ""Error executing SP: "" & Err.Description, vbCritical" & vbCrLf
+    code = code & "        MsgBox ""Error executing SP. Check 'variable_metric_map'. Metric sent: ['"" & finalMetric & ""']"" & vbCrLf & ""DB Error: "" & Err.Description, vbCritical" & vbCrLf
     code = code & "        conn.Close: Exit Sub" & vbCrLf
     code = code & "    End If" & vbCrLf
     code = code & "    On Error GoTo 0" & vbCrLf
