@@ -413,9 +413,9 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     
     If FormType = "Historical Cashflows" Then
         ' SP: edw.usp_HistoricalCashflowReport_Aggregated
-        ' Params: @Metric, @InvestorIdsCsv, @StartDate, @EndDate, @ReportingCurrencyId, @OutputFieldsCsv
+        ' Params: @Metric (200), @InvestorIdsCsv (MAX), @StartDate (DATE), @EndDate (DATE), @ReportingCurrencyId (INT), @OutputFieldsCsv (MAX)
         
-        code = code & "        .Parameters.Append .CreateParameter(""@Metric"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@Metric"", 200, 1, 200, NullIfEmpty(finalMetric))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@InvestorIdsCsv"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@StartDate"", 133, 1, , ParseDateForDB(Me.txtFromDate.Value))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@EndDate"", 133, 1, , ParseDateForDB(Me.txtToDate.Value))" & vbCrLf
@@ -425,14 +425,15 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
         code = code & "        ccyID = GetCurrencyID(Me.txtCurrency.Value)" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@ReportingCurrencyId"", 3, 1, 4, ccyID)" & vbCrLf
         
-        ' OutputFieldsCsv (Attributes)
+        ' OutputFieldsCsv
         code = code & "        .Parameters.Append .CreateParameter(""@OutputFieldsCsv"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
 
     ElseIf FormType = "Company Diversification" Then
         ' SP: edw.usp_CompanyDiversification_Aggregated
-        ' Params needed: @MetricName, @InvestorNameIdsCsv, @AsOfDate, @ReportingCurrencyId, @OutputFieldsCsv
+        ' Params: @MetricName (200), @InvestorNameIdsCsv (MAX), @AsOfDate (DATE/String?), @ReportingCurrencyId (INT), @OutputFieldsCsv (MAX)
+        ' Note: Image shows @InvestorNameIdsCsv for Company Div, sticking to that.
         
-        code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 200, NullIfEmpty(finalMetric))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameIdsCsv"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 133, 1, , ParseDateForDB(Me.txtAsofDate.Value))" & vbCrLf
         
@@ -446,26 +447,27 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
 
     ElseIf FormType = "My Performance" Then
         ' SP: edw.usp_InvestorPerformance_Aggregated
-        ' Params: @MetricName, @InvestorNameIds, @AsOfDate (INT YYYYMMDD), @ReportingCurrency (STRING), @OutputFields (Not CSV)
+        ' Params: @MetricName (200), @InvestorIds (MAX), @AsOfDate (INT YYYYMMDD), @ReportingCurrency (STRING), @OutputFields (MAX)
         
-        code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameIds"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 200, NullIfEmpty(finalMetric))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@InvestorIds"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
         
         ' Date as INT
         code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 3, 1, 4, ParseDateToInt(Me.txtAsofDate.Value))" & vbCrLf
         
-        ' Currency as String (NOT ID)
-        code = code & "        .Parameters.Append .CreateParameter(""@ReportingCurrency"", 200, 1, 10, Me.txtCurrency.Value)" & vbCrLf
+        ' Currency as String
+        code = code & "        .Parameters.Append .CreateParameter(""@ReportingCurrency"", 200, 1, 50, Me.txtCurrency.Value)" & vbCrLf
         
-        ' OutputFields (Note: Screenshot says @OutputFields, not @OutputFieldsCsv)
+        ' OutputFields
         code = code & "        .Parameters.Append .CreateParameter(""@OutputFields"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
 
     ElseIf FormType = "Portfolio Diversification" Then
         ' SP: edw.usp_PortfolioDiversification_Aggregated
-        ' Params: @Metric, @InvestorNameIdsCsv, @AsOfDate (INT), @ReportingCurrencyId (INT), @OutputFieldsCsv
+        ' Params: @Metric (100), @InvestorNameIdsCsv (NULL), @InvestorIdsCsv (MAX), @AsOfDate (INT), @ReportingCurrencyId (INT), @OutputFieldsCsv (MAX)
         
         code = code & "        .Parameters.Append .CreateParameter(""@Metric"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameIdsCsv"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameIdsCsv"", 200, 1, -1, Null)" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@InvestorIdsCsv"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
         
         ' Date as INT
         code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 3, 1, 4, ParseDateToInt(Me.txtAsofDate.Value))" & vbCrLf
@@ -479,10 +481,9 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
         code = code & "        .Parameters.Append .CreateParameter(""@OutputFieldsCsv"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
 
     Else
-        ' Legacy / Other Forms Mapping
+        ' Legacy / Fallback
         code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 100, NullIfEmpty(finalMetric))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@SourceTableVolVal"", 201, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
-        
         code = code & "        .Parameters.Append .CreateParameter(""@Date"", 133, 1, , ParseDateForDB(Me.txtAsofDate.Value))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@AttributeList"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
         
