@@ -143,6 +143,10 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    If IsNull(val) Or Trim(val & """") = """" Then NullIfEmpty = Null Else NullIfEmpty = val" & vbCrLf
     code = code & "End Function" & vbCrLf & vbCrLf
 
+    code = code & "Private Function SafeStr(val As Variant) As String" & vbCrLf
+    code = code & "    If IsError(val) Then SafeStr = """" Else SafeStr = Trim(val & """")" & vbCrLf
+    code = code & "End Function" & vbCrLf & vbCrLf
+
     code = code & "Private Function GetSelectedItems(lst As Object) As String" & vbCrLf
     code = code & "    Dim i As Long, s As String: s = """"" & vbCrLf
     code = code & "    For i = 0 To lst.ListCount - 1" & vbCrLf
@@ -183,8 +187,8 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    If lastRow < 2 Then Exit Sub" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    For Each cell In ws.Range(ws.Cells(2, colIndex), ws.Cells(lastRow, colIndex))" & vbCrLf
-    code = code & "        If Not IsEmpty(cell.Value) Then" & vbCrLf
-    code = code & "            Me.cboVariableName.AddItem cell.Value" & vbCrLf
+    code = code & "        If SafeStr(cell.Value) <> """" Then" & vbCrLf
+    code = code & "            Me.cboVariableName.AddItem SafeStr(cell.Value)" & vbCrLf
     code = code & "        End If" & vbCrLf
     code = code & "    Next cell" & vbCrLf
     code = code & "End Sub" & vbCrLf & vbCrLf
@@ -212,8 +216,8 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    lastRow = ws.Cells(ws.Rows.Count, ""A"").End(xlUp).Row" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    For i = 2 To lastRow" & vbCrLf
-    code = code & "        If ws.Cells(i, 1).Value = Me.cboVariableName.Value Then" & vbCrLf
-    code = code & "            Me.cboClient.AddItem ws.Cells(i, 2).Value ' Col B" & vbCrLf
+    code = code & "        If SafeStr(ws.Cells(i, 1).Value) = Me.cboVariableName.Value Then" & vbCrLf
+    code = code & "            Me.cboClient.AddItem SafeStr(ws.Cells(i, 2).Value) ' Col B" & vbCrLf
     code = code & "        End If" & vbCrLf
     code = code & "    Next i" & vbCrLf
     code = code & "End Sub" & vbCrLf & vbCrLf
@@ -230,7 +234,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    ' Find the specific row" & vbCrLf
     code = code & "    Dim r As Long: r = 0" & vbCrLf
     code = code & "    For i = 2 To lastRow" & vbCrLf
-    code = code & "        If ws.Cells(i, 1).Value = Me.cboVariableName.Value And ws.Cells(i, 2).Value = Me.cboClient.Value Then" & vbCrLf
+    code = code & "        If SafeStr(ws.Cells(i, 1).Value) = Me.cboVariableName.Value And SafeStr(ws.Cells(i, 2).Value) = Me.cboClient.Value Then" & vbCrLf
     code = code & "            r = i" & vbCrLf
     code = code & "            Exit For" & vbCrLf
     code = code & "        End If" & vbCrLf
@@ -238,31 +242,33 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    " & vbCrLf
     code = code & "    If r > 0 Then" & vbCrLf
     code = code & "        ' 1. Populate Accounts (Col C, separated by ;)" & vbCrLf
-    code = code & "        Dim accRaw As String" & vbCrLf
+    code = code & "        Dim accRaw As Variant" & vbCrLf
     code = code & "        accRaw = ws.Cells(r, 3).Value" & vbCrLf
-    code = code & "        Dim parts() As String" & vbCrLf
-    code = code & "        parts = Split(accRaw, "";"")" & vbCrLf
-    code = code & "        Dim p As Variant" & vbCrLf
-    code = code & "        For Each p In parts" & vbCrLf
-    code = code & "            Me.lstAccounts.AddItem Trim(p)" & vbCrLf
-    code = code & "        Next p" & vbCrLf
+    code = code & "        If Not IsError(accRaw) And Not IsEmpty(accRaw) Then" & vbCrLf
+    code = code & "            Dim parts() As String" & vbCrLf
+    code = code & "            parts = Split(CStr(accRaw), "";"")" & vbCrLf
+    code = code & "            Dim p As Variant" & vbCrLf
+    code = code & "            For Each p In parts" & vbCrLf
+    code = code & "                Me.lstAccounts.AddItem Trim(p)" & vbCrLf
+    code = code & "            Next p" & vbCrLf
+    code = code & "        End If" & vbCrLf
     code = code & "        " & vbCrLf
     code = code & "        ' 2. Auto-Fill Details" & vbCrLf
     
     ' Only fill logic that matches UI controls
     If FormType = "Historical Cashflows" Then
-        code = code & "        Me.txtFromDate.Value = ws.Cells(r, 5).Value ' Col E" & vbCrLf
-        code = code & "        Me.txtToDate.Value = ws.Cells(r, 6).Value   ' Col F" & vbCrLf
+        code = code & "        Me.txtFromDate.Value = SafeStr(ws.Cells(r, 5).Value) ' Col E" & vbCrLf
+        code = code & "        Me.txtToDate.Value = SafeStr(ws.Cells(r, 6).Value)   ' Col F" & vbCrLf
     Else
         ' As of Date is now in Col D (4)
-        code = code & "        Me.txtAsofDate.Value = ws.Cells(r, 4).Value   ' Col D maps to Asof" & vbCrLf
+        code = code & "        Me.txtAsofDate.Value = SafeStr(ws.Cells(r, 4).Value)   ' Col D maps to Asof" & vbCrLf
     End If
     
     ' Currency is in Col H (8)
-    code = code & "        Me.txtCurrency.Value = ws.Cells(r, 8).Value ' Col H" & vbCrLf
+    code = code & "        Me.txtCurrency.Value = SafeStr(ws.Cells(r, 8).Value) ' Col H" & vbCrLf
     code = code & "        " & vbCrLf
     ' Attributes (Output Fields) is in Col G (7)
-    code = code & "        m_AttributesStr = ws.Cells(r, 7).Value ' Col G" & vbCrLf
+    code = code & "        m_AttributesStr = SafeStr(ws.Cells(r, 7).Value) ' Col G" & vbCrLf
     code = code & "    End If" & vbCrLf
     code = code & "End Sub" & vbCrLf & vbCrLf
     
@@ -306,9 +312,10 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "        ' Read Columns A through C" & vbCrLf
     code = code & "        arr = ws.Range(""A2:C"" & lastRow).Value ' A=Name, B=Key, C=GlobalID" & vbCrLf
     code = code & "        For i = 1 To UBound(arr, 1)" & vbCrLf
-    code = code & "            If Not IsError(arr(i, 1)) And Not IsEmpty(arr(i, 1)) Then" & vbCrLf
+    code = code & "            If SafeStr(arr(i, 1)) <> """" Then" & vbCrLf
     code = code & "                ' Map Name (Col 1) to GlobalID (Col 3)" & vbCrLf
-    code = code & "                If Not dict.Exists(arr(i, 1)) Then dict.Add arr(i, 1), arr(i, 3)" & vbCrLf
+    code = code & "                Dim nKey As String: nKey = SafeStr(arr(i, 1))" & vbCrLf
+    code = code & "                If Not dict.Exists(nKey) Then dict.Add nKey, arr(i, 3)" & vbCrLf
     code = code & "            End If" & vbCrLf
     code = code & "        Next i" & vbCrLf
     code = code & "    End If" & vbCrLf
@@ -318,7 +325,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    s = """"" & vbCrLf
     code = code & "    For i = 0 To lst.ListCount - 1" & vbCrLf
     code = code & "        If lst.Selected(i) Then" & vbCrLf
-    code = code & "            accName = lst.List(i)" & vbCrLf
+    code = code & "            accName = SafeStr(lst.List(i))" & vbCrLf
     code = code & "            If dict.Exists(accName) Then" & vbCrLf
     code = code & "                s = s & dict(accName) & "",""" & vbCrLf
     code = code & "            Else" & vbCrLf
@@ -438,7 +445,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
         ' Note: Image shows @InvestorNameIdsCsv for Company Div, sticking to that.
         
         code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 200, NullIfEmpty(finalMetric))" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameIdsCsv"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@InvestorIdsCsv"", 200, 1, -1, NullIfEmpty(strAccountKeys))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 133, 1, , ParseDateForDB(Me.txtAsofDate.Value))" & vbCrLf
         
         ' Currency ID
