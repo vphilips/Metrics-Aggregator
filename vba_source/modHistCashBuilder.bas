@@ -323,16 +323,24 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    ' 2. Map Selected items" & vbCrLf
     code = code & "    Dim s As String, key As Variant, accName As String" & vbCrLf
     code = code & "    s = """"" & vbCrLf
+    code = code & "    Dim missingList As String: missingList = """"" & vbCrLf
+    code = code & "    " & vbCrLf
     code = code & "    For i = 0 To lst.ListCount - 1" & vbCrLf
     code = code & "        If lst.Selected(i) Then" & vbCrLf
     code = code & "            accName = SafeStr(lst.List(i))" & vbCrLf
     code = code & "            If dict.Exists(accName) Then" & vbCrLf
     code = code & "                s = s & dict(accName) & "",""" & vbCrLf
     code = code & "            Else" & vbCrLf
-    code = code & "                s = s & accName & "",""" & vbCrLf
+    code = code & "                missingList = missingList & vbCrLf & ""- "" & accName" & vbCrLf
     code = code & "            End If" & vbCrLf
     code = code & "        End If" & vbCrLf
     code = code & "    Next i" & vbCrLf
+    code = code & "    " & vbCrLf
+    code = code & "    If Len(missingList) > 0 Then" & vbCrLf
+    code = code & "        MsgBox ""The following accounts could not be mapped to an Investor ID (check 'database' sheet):"" & vbCrLf & missingList, vbCritical" & vbCrLf
+    code = code & "        GetAccountKeys = """"" & vbCrLf
+    code = code & "        Exit Function" & vbCrLf
+    code = code & "    End If" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    If Len(s) > 0 Then s = Left(s, Len(s) - 1)" & vbCrLf
     code = code & "    GetAccountKeys = s" & vbCrLf
@@ -406,9 +414,16 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    finalMetric = GetMetricFromVariable(Me.cboVariableName.Value)" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    ' 2. Get Account Keys (GLOBAL IDs for ALL forms)" & vbCrLf
+    code = code & "    Dim hasSelection As Boolean: hasSelection = False" & vbCrLf
+    code = code & "    Dim k As Long" & vbCrLf
+    code = code & "    For k = 0 To Me.lstAccounts.ListCount - 1" & vbCrLf
+    code = code & "        If Me.lstAccounts.Selected(k) Then hasSelection = True: Exit For" & vbCrLf
+    code = code & "    Next k" & vbCrLf
+    code = code & "    If Not hasSelection Then MsgBox ""Select at least one Account"": Exit Sub" & vbCrLf
+    code = code & "    " & vbCrLf
     code = code & "    Dim strAccountKeys As String" & vbCrLf
     code = code & "    strAccountKeys = GetAccountKeys(Me.lstAccounts)" & vbCrLf
-    code = code & "    If strAccountKeys = """" Then MsgBox ""Select at least one Account"": Exit Sub" & vbCrLf
+    code = code & "    If strAccountKeys = """" Then Exit Sub" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    ' Execute" & vbCrLf
     code = code & "    Dim conn As Object, cmd As Object, rs As Object" & vbCrLf
