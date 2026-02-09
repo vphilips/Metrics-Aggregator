@@ -241,37 +241,40 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    Next i" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    If r > 0 Then" & vbCrLf
-    code = code & "        ' 1. Populate Accounts (Col C, separated by ;)" & vbCrLf
-    code = code & "        Dim accRaw As Variant" & vbCrLf
-    code = code & "        accRaw = ws.Cells(r, 3).Value" & vbCrLf
-    code = code & "        If Not IsError(accRaw) And Not IsEmpty(accRaw) Then" & vbCrLf
-    code = code & "            Dim parts() As String" & vbCrLf
-    code = code & "            Dim cleanRaw As String" & vbCrLf
-    code = code & "            cleanRaw = Replace(CStr(accRaw), "","", "";"") ' Handle commas too" & vbCrLf
-    code = code & "            parts = Split(cleanRaw, "";"")" & vbCrLf
-    code = code & "            Dim p As Variant" & vbCrLf
-    code = code & "            For Each p In parts" & vbCrLf
-    code = code & "                Me.lstAccounts.AddItem Trim(p)" & vbCrLf
-    code = code & "            Next p" & vbCrLf
-    code = code & "        End If" & vbCrLf
-    code = code & "        " & vbCrLf
-    code = code & "        ' 2. Auto-Fill Details" & vbCrLf
+    code = code & "            hasMatch = True" & vbCrLf
+    code = code & "            " & vbCrLf
+    code = code & "            ' 1. Populate Accounts (Col C, separated by ;)" & vbCrLf
+    code = code & "            Dim accRaw As Variant" & vbCrLf
+    code = code & "            accRaw = ws.Cells(i, 3).Value" & vbCrLf
+    code = code & "            If Not IsError(accRaw) And Not IsEmpty(accRaw) Then" & vbCrLf
+    code = code & "                Dim parts() As String" & vbCrLf
+    code = code & "                Dim cleanRaw As String" & vbCrLf
+    code = code & "                cleanRaw = Replace(CStr(accRaw), "","", "";"") ' Handle commas too" & vbCrLf
+    code = code & "                parts = Split(cleanRaw, "";"")" & vbCrLf
+    code = code & "                Dim p As Variant" & vbCrLf
+    code = code & "                For Each p In parts" & vbCrLf
+    code = code & "                    Me.lstAccounts.AddItem Trim(p)" & vbCrLf
+    code = code & "                Next p" & vbCrLf
+    code = code & "            End If" & vbCrLf
+    code = code & "            " & vbCrLf
+    code = code & "            ' 2. Auto-Fill Details (Last match wins for single-value fields)" & vbCrLf
     
     ' Only fill logic that matches UI controls
     If FormType = "Historical Cashflows" Then
-        code = code & "        Me.txtFromDate.Value = SafeStr(ws.Cells(r, 5).Value) ' Col E" & vbCrLf
-        code = code & "        Me.txtToDate.Value = SafeStr(ws.Cells(r, 6).Value)   ' Col F" & vbCrLf
+        code = code & "            Me.txtFromDate.Value = SafeStr(ws.Cells(i, 5).Value) ' Col E" & vbCrLf
+        code = code & "            Me.txtToDate.Value = SafeStr(ws.Cells(i, 6).Value)   ' Col F" & vbCrLf
     Else
         ' As of Date is now in Col D (4)
-        code = code & "        Me.txtAsofDate.Value = SafeStr(ws.Cells(r, 4).Value)   ' Col D maps to Asof" & vbCrLf
+        code = code & "            Me.txtAsofDate.Value = SafeStr(ws.Cells(i, 4).Value)   ' Col D maps to Asof" & vbCrLf
     End If
     
     ' Currency is in Col H (8)
-    code = code & "        Me.txtCurrency.Value = SafeStr(ws.Cells(r, 8).Value) ' Col H" & vbCrLf
-    code = code & "        " & vbCrLf
+    code = code & "            Me.txtCurrency.Value = SafeStr(ws.Cells(i, 8).Value) ' Col H" & vbCrLf
+    code = code & "            " & vbCrLf
     ' Attributes (Output Fields) is in Col G (7)
-    code = code & "        m_AttributesStr = SafeStr(ws.Cells(r, 7).Value) ' Col G" & vbCrLf
-    code = code & "    End If" & vbCrLf
+    code = code & "            m_AttributesStr = SafeStr(ws.Cells(i, 7).Value) ' Col G" & vbCrLf
+    code = code & "        End If" & vbCrLf
+    code = code & "    Next i" & vbCrLf
     code = code & "End Sub" & vbCrLf & vbCrLf
     
     ' --- Select All ---
