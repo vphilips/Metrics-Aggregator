@@ -9,7 +9,7 @@ Option Explicit
 ' ==================================================================================
 
 Public Sub BuildDynamicForm(ByVal FormType As String, ByVal FormCaption As String, ByVal SPName As String)
-    If Not CheckSecurityAccess() Then Exit Sub
+    If Not modFormHelpers.CheckSecurityAccess() Then Exit Sub
     Application.ScreenUpdating = False
     
     Dim fName As String
@@ -50,18 +50,7 @@ End Sub
 ' ==================================================================================
 ' HELPERS
 ' ==================================================================================
-Private Function CheckSecurityAccess() As Boolean
-    Dim vbp As Object
-    On Error Resume Next
-    Set vbp = ThisWorkbook.VBProject
-    On Error GoTo 0
-    If vbp Is Nothing Or vbp.Protection = 1 Then
-        MsgBox "Please enable 'Trust access to the VBA project object model' and unlock project.", vbCritical
-        CheckSecurityAccess = False
-    Else
-        CheckSecurityAccess = True
-    End If
-End Function
+
 
 Private Sub DeleteFormIfExists(formName As String)
     Dim vbComp As Object
@@ -138,23 +127,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = "Option Explicit" & vbCrLf
     code = code & "Private m_AttributesStr As String" & vbCrLf & vbCrLf
     
-    ' --- HELPERS ---
-    code = code & "Private Function NullIfEmpty(val As Variant) As Variant" & vbCrLf
-    code = code & "    If IsNull(val) Or Trim(val & """") = """" Then NullIfEmpty = Null Else NullIfEmpty = val" & vbCrLf
-    code = code & "End Function" & vbCrLf & vbCrLf
 
-    code = code & "Private Function SafeStr(val As Variant) As String" & vbCrLf
-    code = code & "    If IsError(val) Then SafeStr = """" Else SafeStr = Trim(val & """")" & vbCrLf
-    code = code & "End Function" & vbCrLf & vbCrLf
-
-    code = code & "Private Function GetSelectedItems(lst As Object) As String" & vbCrLf
-    code = code & "    Dim i As Long, s As String: s = """"" & vbCrLf
-    code = code & "    For i = 0 To lst.ListCount - 1" & vbCrLf
-    code = code & "        If lst.Selected(i) Then s = s & lst.List(i) & "", """ & vbCrLf
-    code = code & "    Next i" & vbCrLf
-    code = code & "    If Len(s) > 0 Then s = Left(s, Len(s) - 2)" & vbCrLf
-    code = code & "    GetSelectedItems = s" & vbCrLf
-    code = code & "End Function" & vbCrLf & vbCrLf
     
     ' --- INIT: Load Variable Names from form_metrics ---
     code = code & "Private Sub UserForm_Initialize()" & vbCrLf
@@ -231,25 +204,17 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    Set ws = ThisWorkbook.Sheets(""form_config"")" & vbCrLf
     code = code & "    lastRow = ws.Cells(ws.Rows.Count, ""A"").End(xlUp).Row" & vbCrLf
     code = code & "    " & vbCrLf
-    code = code & "    ' Find the specific row" & vbCrLf
-    code = code & "    Dim r As Long: r = 0" & vbCrLf
+    code = code & "    ' Aggregate from ALL matching rows" & vbCrLf
     code = code & "    For i = 2 To lastRow" & vbCrLf
     code = code & "        If SafeStr(ws.Cells(i, 1).Value) = Me.cboVariableName.Value And SafeStr(ws.Cells(i, 2).Value) = Me.cboClient.Value Then" & vbCrLf
-    code = code & "            r = i" & vbCrLf
-    code = code & "            Exit For" & vbCrLf
-    code = code & "        End If" & vbCrLf
-    code = code & "    Next i" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    If r > 0 Then" & vbCrLf
-    code = code & "            hasMatch = True" & vbCrLf
     code = code & "            " & vbCrLf
-    code = code & "            ' 1. Populate Accounts (Col C, separated by ;)" & vbCrLf
+    code = code & "            ' 1. Populate Accounts (Aggregation)" & vbCrLf
     code = code & "            Dim accRaw As Variant" & vbCrLf
     code = code & "            accRaw = ws.Cells(i, 3).Value" & vbCrLf
     code = code & "            If Not IsError(accRaw) And Not IsEmpty(accRaw) Then" & vbCrLf
     code = code & "                Dim parts() As String" & vbCrLf
     code = code & "                Dim cleanRaw As String" & vbCrLf
-    code = code & "                cleanRaw = Replace(CStr(accRaw), "","", "";"") ' Handle commas too" & vbCrLf
+    code = code & "                cleanRaw = Replace(CStr(accRaw), "","", "";"")" & vbCrLf
     code = code & "                parts = Split(cleanRaw, "";"")" & vbCrLf
     code = code & "                Dim p As Variant" & vbCrLf
     code = code & "                For Each p In parts" & vbCrLf
@@ -257,21 +222,16 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "                Next p" & vbCrLf
     code = code & "            End If" & vbCrLf
     code = code & "            " & vbCrLf
-    code = code & "            ' 2. Auto-Fill Details (Last match wins for single-value fields)" & vbCrLf
+    code = code & "            ' 2. Update Details (Last match updates value)" & vbCrLf
     
-    ' Only fill logic that matches UI controls
     If FormType = "Historical Cashflows" Then
-        code = code & "            Me.txtFromDate.Value = SafeStr(ws.Cells(i, 5).Value) ' Col E" & vbCrLf
-        code = code & "            Me.txtToDate.Value = SafeStr(ws.Cells(i, 6).Value)   ' Col F" & vbCrLf
+        code = code & "            Me.txtFromDate.Value = SafeStr(ws.Cells(i, 5).Value)" & vbCrLf
+        code = code & "            Me.txtToDate.Value = SafeStr(ws.Cells(i, 6).Value)" & vbCrLf
     Else
-        ' As of Date is now in Col D (4)
-        code = code & "            Me.txtAsofDate.Value = SafeStr(ws.Cells(i, 4).Value)   ' Col D maps to Asof" & vbCrLf
+        code = code & "            Me.txtAsofDate.Value = SafeStr(ws.Cells(i, 4).Value)" & vbCrLf
     End If
     
-    ' Currency is in Col H (8)
     code = code & "            Me.txtCurrency.Value = SafeStr(ws.Cells(i, 8).Value) ' Col H" & vbCrLf
-    code = code & "            " & vbCrLf
-    ' Attributes (Output Fields) is in Col G (7)
     code = code & "            m_AttributesStr = SafeStr(ws.Cells(i, 7).Value) ' Col G" & vbCrLf
     code = code & "        End If" & vbCrLf
     code = code & "    Next i" & vbCrLf
@@ -285,129 +245,15 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "    Next i" & vbCrLf
     code = code & "End Sub" & vbCrLf & vbCrLf
     
-    ' --- HELPERS FOR LOOKUPS ---
-    code = code & "Private Function GetMetricFromVariable(varName As String) As String" & vbCrLf
-    code = code & "    On Error Resume Next" & vbCrLf
-    code = code & "    Dim ws As Worksheet, rng As Range, f As Range" & vbCrLf
-    code = code & "    Set ws = ThisWorkbook.Sheets(""variable_metric_map"")" & vbCrLf
-    code = code & "    If ws Is Nothing Then GetMetricFromVariable = varName: Exit Function" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    ' Assumes Variable in Col A, Metric in Col B" & vbCrLf
-    code = code & "    Set rng = ws.Range(""A:A"")" & vbCrLf
-    code = code & "    Set f = rng.Find(What:=Trim(varName), LookIn:=xlValues, LookAt:=xlWhole)" & vbCrLf
-    code = code & "    If Not f Is Nothing Then" & vbCrLf
-    code = code & "        GetMetricFromVariable = SafeStr(f.Offset(0, 1).Value)" & vbCrLf
-    code = code & "    Else" & vbCrLf
-    code = code & "        MsgBox ""Variable '"" & varName & ""' not found in 'variable_metric_map' sheet."", vbCritical" & vbCrLf
-    code = code & "        GetMetricFromVariable = """"" & vbCrLf
-    code = code & "    End If" & vbCrLf
-    code = code & "End Function" & vbCrLf & vbCrLf
 
-    code = code & "Private Function GetAccountKeys(lst As Object) As String" & vbCrLf
-    code = code & "    ' 1. Load Account Map (Name -> GlobalID) into Dictionary for speed" & vbCrLf
-    code = code & "    Dim dict As Object" & vbCrLf
-    code = code & "    Set dict = CreateObject(""Scripting.Dictionary"")" & vbCrLf
-    code = code & "    dict.CompareMode = 1 ' TextCompare" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    Dim ws As Worksheet, arr As Variant, i As Long, lastRow As Long" & vbCrLf
-    code = code & "    Set ws = ThisWorkbook.Sheets(""database"")" & vbCrLf
-    code = code & "    If ws Is Nothing Then MsgBox ""Database sheet missing!"": Exit Function" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    lastRow = ws.Cells(ws.Rows.Count, ""A"").End(xlUp).Row" & vbCrLf
-    code = code & "    If lastRow >= 2 Then" & vbCrLf
-    code = code & "        ' Read Columns A through C" & vbCrLf
-    code = code & "        arr = ws.Range(""A2:C"" & lastRow).Value ' A=Name, B=Key, C=GlobalID" & vbCrLf
-    code = code & "        For i = 1 To UBound(arr, 1)" & vbCrLf
-    code = code & "            If SafeStr(arr(i, 1)) <> """" Then" & vbCrLf
-    code = code & "                ' Map Name (Col 1) to GlobalID (Col 3)" & vbCrLf
-    code = code & "                Dim nKey As String: nKey = SafeStr(arr(i, 1))" & vbCrLf
-    code = code & "                If Not dict.Exists(nKey) Then dict.Add nKey, arr(i, 3)" & vbCrLf
-    code = code & "            End If" & vbCrLf
-    code = code & "        Next i" & vbCrLf
-    code = code & "    End If" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    ' 2. Map Selected items" & vbCrLf
-    code = code & "    Dim s As String, key As Variant, accName As String" & vbCrLf
-    code = code & "    s = """"" & vbCrLf
-    code = code & "    Dim missingList As String: missingList = """"" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    For i = 0 To lst.ListCount - 1" & vbCrLf
-    code = code & "        If lst.Selected(i) Then" & vbCrLf
-    code = code & "            accName = SafeStr(lst.List(i))" & vbCrLf
-    code = code & "            If dict.Exists(accName) Then" & vbCrLf
-    code = code & "                s = s & dict(accName) & "",""" & vbCrLf
-    code = code & "            Else" & vbCrLf
-    code = code & "                missingList = missingList & vbCrLf & ""- "" & accName" & vbCrLf
-    code = code & "            End If" & vbCrLf
-    code = code & "        End If" & vbCrLf
-    code = code & "    Next i" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    If Len(missingList) > 0 Then" & vbCrLf
-    code = code & "        MsgBox ""The following accounts could not be mapped to an Investor ID (check 'database' sheet):"" & vbCrLf & missingList, vbCritical" & vbCrLf
-    code = code & "        GetAccountKeys = """"" & vbCrLf
-    code = code & "        Exit Function" & vbCrLf
-    code = code & "    End If" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    If Len(s) > 0 Then s = Left(s, Len(s) - 1)" & vbCrLf
-    code = code & "    GetAccountKeys = s" & vbCrLf
-    code = code & "End Function" & vbCrLf & vbCrLf
 
-    ' --- HELPERS FOR DATES ---
-    code = code & "Private Function ParseDateForDB(val As Variant) As Variant" & vbCrLf
-    code = code & "    If IsNull(val) Or Trim(val & """") = """" Then" & vbCrLf
-    code = code & "        ParseDateForDB = Null" & vbCrLf
-    code = code & "    Else" & vbCrLf
-    code = code & "        Dim s As String" & vbCrLf
-    code = code & "        s = Trim(val)" & vbCrLf
-    code = code & "        s = Replace(s, ""'"", """")" & vbCrLf
-    code = code & "        " & vbCrLf
-    code = code & "        If IsDate(s) Then" & vbCrLf
-    code = code & "            ParseDateForDB = CDate(s)" & vbCrLf
-    code = code & "        ElseIf IsNumeric(s) Then" & vbCrLf
-    code = code & "            On Error Resume Next" & vbCrLf
-    code = code & "            ParseDateForDB = CDate(CDbl(s))" & vbCrLf
-    code = code & "            If Err.Number <> 0 Then ParseDateForDB = Null" & vbCrLf
-    code = code & "            On Error GoTo 0" & vbCrLf
-    code = code & "        Else" & vbCrLf
-    code = code & "            ParseDateForDB = Null" & vbCrLf
-    code = code & "        End If" & vbCrLf
-    code = code & "    End If" & vbCrLf
-    code = code & "End Function" & vbCrLf & vbCrLf
 
-    ' --- HELPER: DATE INT (YYYYMMDD) ---
-    code = code & "Private Function ParseDateToInt(val As Variant) As Variant" & vbCrLf
-    code = code & "    If IsNull(val) Or Trim(val & """") = """" Then" & vbCrLf
-    code = code & "        ParseDateToInt = Null" & vbCrLf
-    code = code & "    Else" & vbCrLf
-    code = code & "        Dim s As String" & vbCrLf
-    code = code & "        s = Trim(val)" & vbCrLf
-    code = code & "        If IsDate(s) Then" & vbCrLf
-    code = code & "            ParseDateToInt = CLng(Format(CDate(s), ""yyyymmdd""))" & vbCrLf
-    code = code & "        ElseIf IsNumeric(s) And Len(s) = 8 Then" & vbCrLf
-    code = code & "            ParseDateToInt = CLng(s)" & vbCrLf
-    code = code & "        Else" & vbCrLf
-    code = code & "            ParseDateToInt = Null" & vbCrLf
-    code = code & "        End If" & vbCrLf
-    code = code & "    End If" & vbCrLf
-    code = code & "End Function" & vbCrLf & vbCrLf
 
-    ' --- HELPER: CURRENCY LOOKUP ---
-    code = code & "Private Function GetCurrencyID(ccyName As String) As Long" & vbCrLf
-    code = code & "    On Error Resume Next" & vbCrLf
-    code = code & "    Dim ws As Worksheet, rng As Range, f As Range" & vbCrLf
-    code = code & "    Set ws = ThisWorkbook.Sheets(""ccy_map"")" & vbCrLf
-    code = code & "    If ws Is Nothing Then GetCurrencyID = 0: Exit Function" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    ' Look for Currency Code in Col A" & vbCrLf
-    code = code & "    Set rng = ws.Range(""A:A"")" & vbCrLf
-    code = code & "    Set f = rng.Find(What:=Trim(ccyName), LookIn:=xlValues, LookAt:=xlWhole)" & vbCrLf
-    code = code & "    " & vbCrLf
-    code = code & "    If Not f Is Nothing Then" & vbCrLf
-    code = code & "        GetCurrencyID = CLng(f.Offset(0, 1).Value) ' Col B has ID" & vbCrLf
-    code = code & "    Else" & vbCrLf
-    code = code & "        GetCurrencyID = 0 ' Not found" & vbCrLf
-    code = code & "    End If" & vbCrLf
-    code = code & "End Function" & vbCrLf & vbCrLf
+
+
+
+
+
 
     ' --- SUBMIT ---
     code = code & "Private Sub btnSubmit_Click()" & vbCrLf

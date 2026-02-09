@@ -8,7 +8,7 @@ Option Explicit
 ' ==================================================================================
 
 Public Sub BuildAllUserForms()
-    If Not CheckSecurityAccess() Then Exit Sub
+    If Not modFormHelpers.CheckSecurityAccess() Then Exit Sub
     Application.ScreenUpdating = False
     
     ' 1. Historical Cashflows
@@ -28,18 +28,7 @@ Public Sub BuildAllUserForms()
     MsgBox "All UserForms have been built successfully using the new Generic Builder!", vbInformation
 End Sub
 
-Private Function CheckSecurityAccess() As Boolean
-    Dim vbp As Object
-    On Error Resume Next
-    Set vbp = ThisWorkbook.VBProject
-    On Error GoTo 0
-    If vbp Is Nothing Or vbp.Protection = 1 Then
-        MsgBox "Please enable 'Trust access to the VBA project object model' and unlock project.", vbCritical
-        CheckSecurityAccess = False
-    Else
-        CheckSecurityAccess = True
-    End If
-End Function
+
 
 ' Legacy wrappers (optional, kept for compatibility if buttons invoke these directly)
 Public Sub BuildHistCashflowsForm()
