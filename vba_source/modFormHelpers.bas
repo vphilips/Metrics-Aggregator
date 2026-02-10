@@ -56,8 +56,25 @@ Public Function GetMetricFromVariable(varName As String) As String
     End If
 End Function
 
-Public Function GetAccountKeys(lst As Object) As String
-    ' 1. Load Account Map (Name -> GlobalID) into Dictionary for speed
+Public Function GetClientGlobalID(clientName As String) As String
+    On Error Resume Next
+    Dim ws As Worksheet, rng As Range, f As Range
+    Set ws = ThisWorkbook.Sheets("database")
+    If ws Is Nothing Then GetClientGlobalID = "": Exit Function
+    
+    ' Look for Client Name in Col A
+    Set rng = ws.Range("A:A")
+    Set f = rng.Find(What:=Trim(clientName), LookIn:=xlValues, LookAt:=xlWhole)
+    
+    If Not f Is Nothing Then
+        GetClientGlobalID = SafeStr(f.Offset(0, 1).Value) ' Col B has Global ID
+    Else
+        GetClientGlobalID = ""
+    End If
+End Function
+
+Public Function GetFundIds(lst As Object) As String
+    ' 1. Load Fund Map (Account Name -> Fund ID) into Dictionary for speed
     Dim dict As Object
     Set dict = CreateObject("Scripting.Dictionary")
     dict.CompareMode = 1 ' TextCompare
@@ -66,15 +83,19 @@ Public Function GetAccountKeys(lst As Object) As String
     Set ws = ThisWorkbook.Sheets("database")
     If ws Is Nothing Then MsgBox "Database sheet missing!": Exit Function
     
-    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    lastRow = ws.Cells(ws.Rows.Count, "C").End(xlUp).Row
     If lastRow >= 2 Then
-        ' Read Columns A through C
-        arr = ws.Range("A2:C" & lastRow).Value ' A=Name, B=Key, C=GlobalID
+        ' Read Columns C (Account Name) and D (Fund ID)
+        ' Mapping: C -> D. We read A:D to be safe or just C:D? 
+        ' Let's read A:D to be safe with indexing, or just map offsets.
+        ' Reading A1:D...
+        arr = ws.Range("A2:D" & lastRow).Value
         For i = 1 To UBound(arr, 1)
-            If SafeStr(arr(i, 1)) <> "" Then
-                ' Map Name (Col 1) to GlobalID (Col 3)
-                Dim nKey As String: nKey = SafeStr(arr(i, 1))
-                If Not dict.Exists(nKey) Then dict.Add nKey, arr(i, 3)
+            ' Col C is index 3 in A:D range
+            If SafeStr(arr(i, 3)) <> "" Then
+                Dim nKey As String: nKey = SafeStr(arr(i, 3))
+                ' Col D is index 4
+                If Not dict.Exists(nKey) Then dict.Add nKey, arr(i, 4)
             End If
         Next i
     End If
@@ -96,13 +117,13 @@ Public Function GetAccountKeys(lst As Object) As String
     Next i
     
     If Len(missingList) > 0 Then
-        MsgBox "The following accounts could not be mapped to an Investor ID (check 'database' sheet):" & vbCrLf & missingList, vbCritical
-        GetAccountKeys = ""
+        MsgBox "The following accounts could not be mapped to a Fund ID (check 'database' sheet):" & vbCrLf & missingList, vbCritical
+        GetFundIds = ""
         Exit Function
     End If
     
     If Len(s) > 0 Then s = Left(s, Len(s) - 1)
-    GetAccountKeys = s
+    GetFundIds = s
 End Function
 
 ' --- DATES ---
