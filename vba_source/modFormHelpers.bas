@@ -83,19 +83,17 @@ Public Function GetFundIds(lst As Object) As String
     Set ws = ThisWorkbook.Sheets("database")
     If ws Is Nothing Then MsgBox "Database sheet missing!": Exit Function
     
-    lastRow = ws.Cells(ws.Rows.Count, "C").End(xlUp).Row
+    lastRow = ws.Cells(ws.Rows.Count, "D").End(xlUp).Row
     If lastRow >= 2 Then
-        ' Read Columns C (Account Name) and D (Fund ID)
-        ' Mapping: C -> D. We read A:D to be safe or just C:D? 
-        ' Let's read A:D to be safe with indexing, or just map offsets.
-        ' Reading A1:D...
-        arr = ws.Range("A2:D" & lastRow).Value
+        ' Read Columns D (Account Name) and E (Fund ID)
+        ' Mapping: D -> E
+        arr = ws.Range("D2:E" & lastRow).Value
         For i = 1 To UBound(arr, 1)
-            ' Col C is index 3 in A:D range
-            If SafeStr(arr(i, 3)) <> "" Then
-                Dim nKey As String: nKey = SafeStr(arr(i, 3))
-                ' Col D is index 4
-                If Not dict.Exists(nKey) Then dict.Add nKey, arr(i, 4)
+            ' Col D is index 1 in the D:E range
+            If SafeStr(arr(i, 1)) <> "" Then
+                Dim nKey As String: nKey = SafeStr(arr(i, 1))
+                ' Col E is index 2
+                If Not dict.Exists(nKey) Then dict.Add nKey, arr(i, 2)
             End If
         Next i
     End If

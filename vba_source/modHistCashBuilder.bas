@@ -340,6 +340,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
         code = code & "        Dim ccyID As Long" & vbCrLf
         code = code & "        ccyID = GetCurrencyID(Me.txtCurrency.Value)" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@ReportingCurrencyId"", 3, 1, 4, ccyID)" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@FriendlyGuard"", 3, 1, 4, 0)" & vbCrLf
 
     ElseIf FormType = "Portfolio Diversification" Then
         ' SP: edw.usp_PortfolioDiversification_Aggregated
