@@ -306,7 +306,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
         
         code = code & "        .NamedParameters = True" & vbCrLf
         
-        code = code & "        .Parameters.Append .CreateParameter(""@Metric"", 200, 1, 200, NullIfEmpty(finalMetric))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 200, NullIfEmpty(finalMetric))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameId"", 3, 1, 4, CLng(strClientGlobalID))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@FundIdsCsv"", 200, 1, -1, NullIfEmpty(strFundIds))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 133, 1, , ParseDateForDB(Me.txtAsofDate.Value))" & vbCrLf
