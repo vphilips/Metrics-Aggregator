@@ -307,7 +307,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
         code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 200, NullIfEmpty(finalMetric))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameId"", 3, 1, 4, CLng(strClientGlobalID))" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@FundIdsCsv"", 200, 1, -1, NullIfEmpty(strFundIds))" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 200, 1, 20, ParseDateForDB(Me.txtAsofDate.Value))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 133, 1, , ParseDateForDB(Me.txtAsofDate.Value))" & vbCrLf
         
         ' Currency ID
         code = code & "        Dim ccyID As Long" & vbCrLf
@@ -326,17 +326,22 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     ElseIf FormType = "My Performance" Then
         ' SP: edw.usp_InvestorPerformance_Aggregated
         
+        ' 1. @Metric (nvarchar(200))
         code = code & "        .Parameters.Append .CreateParameter(""@Metric"", 200, 1, 200, NullIfEmpty(finalMetric))" & vbCrLf
+        
+        ' 2. @InvestorNameId (int)
         code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameId"", 3, 1, 4, CLng(strClientGlobalID))" & vbCrLf
+        
+        ' 3. @FundIdCsv (nvarchar(max))
         code = code & "        .Parameters.Append .CreateParameter(""@FundIdCsv"", 200, 1, -1, NullIfEmpty(strFundIds))" & vbCrLf
         
-        ' AsOfDate (Int)
+        ' 4. @AsOfDate (int) - strictly yyyymmdd integer
         code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 3, 1, 4, ParseDateToInt(Me.txtAsofDate.Value))" & vbCrLf
-        
-        ' OutputFieldsCsv
+
+        ' 5. @OutputFieldsCsv (nvarchar(max))
         code = code & "        .Parameters.Append .CreateParameter(""@OutputFieldsCsv"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
         
-        ' Reporting Currency ID (Changed from String to ID)
+        ' 6. @ReportingCurrencyId (int)
         code = code & "        Dim ccyID As Long" & vbCrLf
         code = code & "        ccyID = GetCurrencyID(Me.txtCurrency.Value)" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@ReportingCurrencyId"", 3, 1, 4, ccyID)" & vbCrLf
