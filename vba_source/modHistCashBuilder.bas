@@ -317,11 +317,6 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
         ' OutputFieldsCsv
         code = code & "        .Parameters.Append .CreateParameter(""@OutputFieldsCsv"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
         
-        ' Hardcoded values
-        code = code & "        .Parameters.Append .CreateParameter(""@FundPerspectiveViewId"", 3, 1, 4, 3)" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@OwnershipAsOfDateId"", 3, 1, 4, ParseDateToInt(Me.txtAsofDate.Value))" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@UseParentGrouping"", 3, 1, 4, 1)" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@HVStaffBucketId"", 3, 1, 4, 1444282)" & vbCrLf
 
     ElseIf FormType = "My Performance" Then
         ' SP: edw.usp_InvestorPerformance_Aggregated
