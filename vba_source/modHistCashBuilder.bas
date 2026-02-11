@@ -303,19 +303,21 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
 
     ElseIf FormType = "Company Diversification" Then
         ' SP: edw.usp_CompanyDiversification_Aggregated2
+        .NamedParameters = True
         
-        code = code & "        .Parameters.Append .CreateParameter(""@MetricName"", 200, 1, 200, NullIfEmpty(finalMetric))" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameId"", 3, 1, 4, CLng(strClientGlobalID))" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@FundIdsCsv"", 200, 1, -1, NullIfEmpty(strFundIds))" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 133, 1, , ParseDateForDB(Me.txtAsofDate.Value))" & vbCrLf
+        .Parameters.Append .CreateParameter("@Metric", 200, 1, 200, NullIfEmpty(finalMetric))
+        .Parameters.Append .CreateParameter("@InvestorNameId", 3, 1, 4, CLng(strClientGlobalID))
+        .Parameters.Append .CreateParameter("@FundIdsCsv", 200, 1, -1, NullIfEmpty(strFundIds))
+        .Parameters.Append .CreateParameter("@AsOfDate", 133, 1, , ParseDateForDB(Me.txtAsofDate.Value))
         
         ' Currency ID
-        code = code & "        Dim ccyID As Long" & vbCrLf
-        code = code & "        ccyID = GetCurrencyID(Me.txtCurrency.Value)" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@ReportingCurrencyId"", 3, 1, 4, ccyID)" & vbCrLf
+        Dim ccyID As Long
+        ccyID = GetCurrencyID(Me.txtCurrency.Value)
+        .Parameters.Append .CreateParameter("@ReportingCurrencyId", 3, 1, 4, ccyID)
 
         ' OutputFieldsCsv
-        code = code & "        .Parameters.Append .CreateParameter(""@OutputFieldsCsv"", 201, 1, -1, NullIfEmpty(m_AttributesStr))" & vbCrLf
+        .Parameters.Append .CreateParameter("@OutputFieldsCsv", 201, 1, -1, NullIfEmpty(m_AttributesStr))
+
         
 
     ElseIf FormType = "My Performance" Then
