@@ -39,6 +39,7 @@ Public Sub BuildDynamicForm(ByVal FormType As String, ByVal FormCaption As Strin
     End If
     
     AddLabelAndText uf, topPos, "Currency", "Currency", True: topPos = topPos + 24
+    AddLabelAndText uf, topPos, "Attributes", "Attributes (Read-only)", False: topPos = topPos + 24
     
     ' 4. Inject Logic
     InjectCascadingLogic uf, SPName, FormType
@@ -180,6 +181,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     
     code = code & "    Me.txtCurrency.Value = """"" & vbCrLf
     code = code & "    m_AttributesStr = """"" & vbCrLf
+    code = code & "    Me.txtAttributes.Value = """"" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    ' Mapping relies on 'form_config' for cascading" & vbCrLf
     code = code & "    Dim ws As Worksheet, lastRow As Long, i As Long" & vbCrLf
@@ -197,6 +199,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "Private Sub cboClient_Change()" & vbCrLf
     code = code & "    Me.lstAccounts.Clear" & vbCrLf
     code = code & "    m_AttributesStr = """"" & vbCrLf
+    code = code & "    Me.txtAttributes.Value = """"" & vbCrLf
     code = code & "    " & vbCrLf
     code = code & "    Dim ws As Worksheet, lastRow As Long, i As Long" & vbCrLf
     code = code & "    Set ws = ThisWorkbook.Sheets(""form_config"")" & vbCrLf
@@ -238,6 +241,7 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     
     code = code & "            Me.txtCurrency.Value = SafeStr(ws.Cells(i, 8).Value) ' Col H" & vbCrLf
     code = code & "            m_AttributesStr = SafeStr(ws.Cells(i, 7).Value) ' Col G" & vbCrLf
+    code = code & "            Me.txtAttributes.Value = m_AttributesStr" & vbCrLf
     code = code & "        End If" & vbCrLf
     code = code & "    Next i" & vbCrLf
     code = code & "End Sub" & vbCrLf & vbCrLf
