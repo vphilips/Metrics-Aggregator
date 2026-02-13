@@ -212,11 +212,18 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     code = code & "            If Not IsError(accRaw) And Not IsEmpty(accRaw) Then" & vbCrLf
     code = code & "                Dim parts() As String" & vbCrLf
     code = code & "                Dim cleanRaw As String" & vbCrLf
-    code = code & "                cleanRaw = Replace(CStr(accRaw), "","", "";"")" & vbCrLf
+    code = code & "                cleanRaw = CStr(accRaw)" & vbCrLf
     code = code & "                parts = Split(cleanRaw, "";"")" & vbCrLf
     code = code & "                Dim p As Variant" & vbCrLf
     code = code & "                For Each p In parts" & vbCrLf
-    code = code & "                    Me.lstAccounts.AddItem Trim(p)" & vbCrLf
+    code = code & "                    Dim cleanVal As String" & vbCrLf
+    code = code & "                    cleanVal = p" & vbCrLf
+    code = code & "                    ' Handle potential non-breaking spaces (common in Excel data)" & vbCrLf
+    code = code & "                    cleanVal = Replace(cleanVal, Chr(160), "" "")" & vbCrLf
+    code = code & "                    ' Standard Trim handles leading/trailing regular spaces" & vbCrLf
+    code = code & "                    cleanVal = Trim(cleanVal)" & vbCrLf
+    code = code & "                    " & vbCrLf
+    code = code & "                    If Len(cleanVal) > 0 Then Me.lstAccounts.AddItem cleanVal" & vbCrLf
     code = code & "                Next p" & vbCrLf
     code = code & "            End If" & vbCrLf
     code = code & "            " & vbCrLf
@@ -287,11 +294,19 @@ Private Sub InjectCascadingLogic(formComp As Object, spName As String, FormType 
     If FormType = "Historical Cashflows" Then
         ' SP: edw.usp_HistoricalCashflowReport_Aggregated
         
+        code = code & "        .NamedParameters = True" & vbCrLf
+
         code = code & "        .Parameters.Append .CreateParameter(""@Metric"", 200, 1, 200, NullIfEmpty(finalMetric))" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameIdsCsv"", 200, 1, 50, ""-1"") ' Hardcoded -1" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@InvestorNameIdsCsv"", 200, 1, 255, NullIfEmpty(strClientGlobalID))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@InvestorIdsCsv"", 200, 1, -1, Null)" & vbCrLf
         code = code & "        .Parameters.Append .CreateParameter(""@FundIdsCsv"", 200, 1, -1, NullIfEmpty(strFundIds))" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@StartDate"", 133, 1, , ParseDateForDB(Me.txtFromDate.Value))" & vbCrLf
-        code = code & "        .Parameters.Append .CreateParameter(""@EndDate"", 133, 1, , ParseDateForDB(Me.txtToDate.Value))" & vbCrLf
+        
+        ' Pass Dates as Strings to let SQL handle conversion (avoid int/date clash)
+        code = code & "        .Parameters.Append .CreateParameter(""@StartDate"", 200, 1, 20, Format(ParseDateForDB(Me.txtFromDate.Value), ""yyyy-mm-dd""))" & vbCrLf
+        code = code & "        .Parameters.Append .CreateParameter(""@EndDate"", 200, 1, 20, Format(ParseDateForDB(Me.txtToDate.Value), ""yyyy-mm-dd""))" & vbCrLf
+        
+        ' AsOfDate is a DATE in SQL. Pass as String/Variant (200) with Null to avoid "Int is incompatible with Date" error.
+        code = code & "        .Parameters.Append .CreateParameter(""@AsOfDate"", 200, 1, 20, Null)" & vbCrLf
         
         ' Currency ID
         code = code & "        Dim ccyID As Long" & vbCrLf
